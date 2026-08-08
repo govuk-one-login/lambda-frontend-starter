@@ -41,7 +41,7 @@ jobs:
         run: "pip install --require-hashes --only-binary :all: -r .github/workflows/requirements.txt"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci && cd solutions/integration-tests && npm ci
 
       - name: Build
         run: npm run build
