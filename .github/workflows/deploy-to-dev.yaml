@@ -1,5 +1,7 @@
 name: Deploy application to dev
 
+permissions: {}
+
 on:
   workflow_dispatch: # checkov:skip=CKV_GHA_7: workflow intentionally allows ref selection for dev deployments
     inputs:

@@ -411,6 +411,11 @@ Resources:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
+    Metadata:
+      checkov:
+        skip:
+          - id: "CKV_AWS_28"
+            comment: "Sessions table does not require point in time recovery as session data is ephemeral"
     Properties:
       TableName: !Sub ${AWS::StackName}-SessionStore
       AttributeDefinitions:
