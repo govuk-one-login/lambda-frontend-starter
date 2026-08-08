@@ -25,7 +25,7 @@
     "cookie": "^1.1.1",
     "fastify": "^5.10.0",
     "fastify-plugin": "^6.0.0",
-    "govuk-frontend": "^5.14.0",
+    "govuk-frontend": "^6.4.0",
     "i18next": "^26.3.4",
     "i18next-http-middleware": "^3.9.7",
     "nunjucks": "^3.2.4",
