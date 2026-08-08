@@ -100,7 +100,7 @@ describe("formErrorsHelpers", () => {
     it("returns success with parsed value for valid data", () => {
       const validData = {
         email: "test@example.com",
-        password: "password123",
+        password: "password123", // pragma: allowlist secret
       };
       const result = checkValueForFormErrors(validData, testSchema);
 
@@ -112,7 +112,7 @@ describe("formErrorsHelpers", () => {
     it("returns formatted errors for invalid data", () => {
       const invalidData = {
         email: "invalid-email",
-        password: "short",
+        password: "short", // pragma: allowlist secret
       };
       const result = checkValueForFormErrors(invalidData, testSchema);
 
