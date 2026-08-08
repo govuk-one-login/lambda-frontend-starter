@@ -89,7 +89,7 @@ repos:
     rev: bb451c5c4ae66a948eb8af386d0079e16a8ca0aa # pragma: allowlist secret
     hooks:
       - id: checkov
-        args: ["--directory", "./"]
+        entry: npm run checkov
 
   - repo: local
     hooks:
