@@ -32,6 +32,7 @@ export class DynamoDbSessionStore implements SessionStore {
         },
         ExpressionAttributeValues: {
           ":session": JSON.stringify(session),
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           ":expires": session.expires ?? defaultSessionLength,
         },
       })

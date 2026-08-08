@@ -20,6 +20,7 @@ describe("csrfProtection", () => {
       body: {},
     };
     reply = {
+      // @ts-expect-error
       globals: {},
       generateCsrf: vi.fn().mockReturnValue("csrf-token-123"),
     };
