@@ -1,24 +1,82 @@
-# account-components
+# Lambda frontend starter project
 
-This repo contains the code for Account Components
+## What features are included? (in no particular order and not exhaustive)
+
+- Fastify-based frontend application running using ESM and strict TypeScript type checking
+- Built with Rolldown to enable code splitting tree shaking and minification to minimise cold start times
+- Serving and client-side caching of static assets with cache busting query strings generated at build-time
+- CSRF protection
+- HTTP security headers via Helmet
+- Nunjucks templating
+- SCSS compilation and CSS minification
+- Internationalisation
+- Sessions using DynamoDB
+- Analytics
+- GOV.UK frontend and GOV.UK One Login frontend UI
+- Device intelligence
+- Base templates implementing a standard GOV.UK One Login header and footer, skip link, phase banner, form error summary, cookie banner, language toggle, back link
+- Utilities for structured logging and metrics
+- Request/response structured logging
+- Fast local development server with file watching and rebuilding
+- Local AWS stack via Docker: Floci and Local KMS
+- AWS client preconfigured to work with AWS and the local emulations
+- CloudFormation template containing most of the infrastructure needed to deploy this application via the Dev Platform SAM pipeline
+- Dynatrace Lambda layer
+- Sensible API Gateway and Lambda alarms
+- Canaries
+- Unit testing with Vitest
+- Test coverage reporting
+- Playwright + playwright-bdd for integration tests which run locally, in GitHub Actions and in the deployment pipeline
+- Pre-written integration tests for basic functionality
+- Pre-commit preconfigured
+- GitHub Actions for deployment (including manually deploying to dev), linting, unit testing, integration testing, SonarCloud scanning, reviewing dependencies
+- Dependabot pre-configured with cooldowns
+- Quality gate manifest which reflects the checks in place
+- `CODEOWNERS`, `CODE_OF_CONDUCT.md`, `SECURITY.md` included
+- Normalisation of API Gateway event headers and query string parameters
+- Utilities for Valibot schema validation errors mapped to GOV.UK error summary format
+- Example pages to help getting started
+- Healthcheck endpoint at `/healthcheck`
+- Trailing slash removal
+- robots.txt
+- SonarCloud config
+
+## How to get started
+
+- Fork this repo into the `govuk-one-login` organisation
+- Consider configuring the new repo with these recommended settings:
+  - Require the following passing checks: `sonarcloud`, `dependency-review`, `local-tests-integration`, `local-tests-unit`, `lint`
+  - Require merge queue
+- Ensure your Dev Platform SAM pipeline stack is configured with the following settings:
+  - Allowed services: EC2 (required to attach lambdas to VPC), DynamoDB, Lambda (required for canaries), Xray
+  - `ProgrammaticPermissionsBoundary`: `true`
+  - `AdditionalCodeSigningVersionArns`: set the the value detailed at https://github.com/govuk-one-login/observability-infrastructure/blob/main/lambdalayer/README.md?plain=1#L13
+  - `CustomKmsKeyArns`: set to the value detailed at https://github.com/govuk-one-login/observability-infrastructure/blob/main/lambdalayer/README.md?plain=1#L14
+  - `RunTestContainerInVPC`: `true`
+  - `TestReportFormat`: `CUCUMBERJSON`
+  - `TestImageRepositoryNames`: the name of your test image repository (see https://github.com/govuk-one-login/devplatform-deploy/tree/main/test-image-repository)
+  - `TestImageRepositoryUri`: the URI of your test image repository (see https://github.com/govuk-one-login/devplatform-deploy/tree/main/test-image-repository)
+  - `TestComputeType`: `BUILD_GENERAL1_2XLARGE` (ensures many integration tests can run in parallel)
+- Ensure your Dev Platform VPC stack is configured with the following settings:
+  - Allowed services: EC2 (required to attach lambdas to VPC), DynamoDB, Lambda (required for canaries), Xray
+  - `DynatraceApiEnabled`: `Yes` (see https://github.com/govuk-one-login/observability-infrastructure/blob/6cd6a5a26493ef08b99e4c88276a1b8c3b9ec1ff/lambdalayer/README.md?plain=1#L16)
+- Find and action all instances of `CHANGEME` and `changme`
+- Retain the contents of this README file below to following horizontal rule
+
+---
+
+This repo contains the code for CHANGEME
 
 ## Set up and installation
 
-- In GitHub create a personal access token which has `read:packages` permission and in the configuration file for your shell export a variable called `NODE_AUTH_TOKEN` with the value of the personal access token
 - Copy `solutions/frontend/.env.sample` to `solutions/frontend/.env` and replace any placeholder values as appropriate
-- Copy `solutions/stubs/.env.sample` to `solutions/stubs/.env` and replace any placeholder values as appropriate
-- Copy `solutions/api/env.json.sample` to `solutions/api/env.json` and replace any placeholder values as appropriate
-- Install [NVM](https://github.com/nvm-sh/nvm) or [FNM](https://github.com/Schniz/fnm) and select the correct Node version by running `nvm use` or `fnm use`
+- Install [FNM](https://github.com/Schniz/fnm) or [NVM](https://github.com/nvm-sh/nvm) and select the correct Node version by running `nvm use` or `fnm use`
 - Install Docker
 - Install [Homebrew](https://brew.sh/)
 - Install Brewfile dependencies with `npm run install-brewfile`
-- Install dependencies with `npm run install-all`
+- Install dependencies with `npm ci`
 - Install Git Hooks with `npm run install-git-hooks`
-- Run `npm run run:all` to start all the local servers. The frontend will be available at `http://localhost:6002`, the stubs at `http://localhost:6003` and the API at `http://localhost:6004`. The frontend and stubs will watch for changes and rebuild on demand but the API will not and needs to be restarted for changes to take effect.
-
-## Updating the event catalogue dev dependencies from the private registry
-
-To install the latest versions of the private event catalogue dependencies run `npm install @govuk-one-login/event-catalogue-schemas@latest @govuk-one-login/event-catalogue@latest --registry https://npm.pkg.github.com`.
+- Run `npm run start` to run the frontend. It will be available at `http://localhost:6002` and will watch for changes and rebuild on demand.
 
 ## Updating Node version
 
@@ -36,14 +94,8 @@ When updating the Node version you will need to update the following:
 
 There are various commands which can be run manually and which may also be run by Git hooks and in CI:
 
-- `npm run run:all` to run the everything necessary to run the app locally and watch for changes
-- `npm run run:frontend` to run the frontend locally and watch for changes
-- `npm run build:frontend` to build the frontend
-- `npm run run:stubs` to run the stubs locally and watch for changes
-- `npm run build:stubs` to build the stubs
-- `npm run run:api` to run the API locally
-- `npm run generate-config-types` to generate TypeScript types from the App Config JSON schema
-- `npm run build:all` to build everything
+- `npm run start` to run the frontend locally and watch for changes
+- `npm run build` to build the frontend
 - `npm run test` to run [Vitest](https://vitest.dev/) tests
 - `npm run test:watch` to run [Vitest](https://vitest.dev/) tests in watch mode
 - `npm run test:coverage` to run [Vitest](https://vitest.dev/) tests and check coverage
@@ -51,13 +103,10 @@ There are various commands which can be run manually and which may also be run b
 - `npm run format` to run [Prettier](https://prettier.io/) formatting
 - `npm run eslint` to run [ESLint](https://eslint.org/)
 - `npm run knip` to run [Knip](https://knip.dev/)
-- `npm run tflint` to [lint Terraform](https://github.com/terraform-linters/tflint) files
-- `npm run cfnlint` to [lint CloudFormation](https://github.com/aws-cloudformation/cfn-lint) templates with the file extension `.cf.yaml`
 - `npm run sam-validate` to run [SAM validation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-validate.html) against the CloudFormation template
 - `npm run zizmor` to check GitHub Actions with [Zizmor](https://docs.zizmor.sh/)
+- `npm run checkov` to run [Checkov](https://www.checkov.io/) checks against the repo
 - `npm run detect-secrets` to detect secrets which should not be in the repo. False positives can be [ignored with comments](https://github.com/Yelp/detect-secrets?tab=readme-ov-file#inline-allowlisting) or by recreating the baseline file by running `npm run detect-secrets-recreate`
-- `npm run config:validate` to validate the application's config
-- `npm run api-specs:validate` to validate the OpenAPI specs
 - `npm run audit` to check for NPM package vulnerabilities and check package signature integrity
 
 If these commands detect issues it may be possible to fix them by running:
@@ -65,7 +114,6 @@ If these commands detect issues it may be possible to fix them by running:
 - `npm run format:fix`
 - `npm run eslint:fix`
 - `npm run knip:fix`
-- `npm run tflint:fix`
 - `npm run zizmor:fix`
 
 ## Integration testing

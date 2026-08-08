@@ -12,8 +12,6 @@ on:
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
-    permissions:
-      packages: read
 
     steps:
       - name: Checkout
@@ -27,9 +25,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run install-all
+        run: npm ci
 
       - name: Run tests and report coverage
         run: npm run test:coverage
@@ -38,4 +34,8 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # CHANGEME add a GitHub secret called SONAR_TOKEN
+          # with the value of your project's SonarCloud token
+          # CHANGEME add a GitHub Dependabot secret called SONAR_TOKEN
+          # with the value of your project's SonarCloud token
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

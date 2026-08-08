@@ -1,9 +1,9 @@
 import { expect, it, describe, vi, afterEach } from "vitest";
 import { handler } from "./index.js";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { getEnvironment } from "../../../../commons/utils/getEnvironment/index.js";
+import { getEnvironment } from "../../utils/getEnvironment/index.js";
 
-vi.mock(import("../../../../commons/utils/getEnvironment/index.js"), () => ({
+vi.mock(import("../../utils/getEnvironment/index.js"), () => ({
   getEnvironment: vi.fn(),
 }));
 

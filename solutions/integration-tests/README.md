@@ -26,10 +26,6 @@ When running tests locally they are run against a locally running version of the
 
 Copy the file `/solutions/frontend/.env.integration-tests.sample` to `/solutions/frontend/.env.integration-tests` and replace any placeholder values as appropriate.
 
-Copy the file `/solutions/stubs/.env.integration-tests.sample` to `/solutions/stubs/.env.integration-tests` and replace any placeholder values as appropriate.
-
-Copy the file `/solutions/api/env.integration-tests.json.sample` to `/solutions/api/env.integration-tests.json` and replace any placeholder values as appropriate.
-
 Copy the file `/solutions/integration-tests/.env.sample` to `/solutions/integration-tests/.env` and replace any placeholder values as appropriate.
 
 To run the tests:
@@ -53,7 +49,7 @@ cd /solutions/integration-tests
 npm run test:update-snapshots
 ```
 
-Before running the tests these commands will start the test server in which the browsers will run (when `PRE_OR_POST_DEPLOY` is `pre`), and if `TEST_ENVIRONMENT` is `local` they will also start the necessary application servers. These servers are also stopped once the tests have run. Starting the servers can take some time. If you’re writing or updating tests and will need to frequently run them whilst doing so then prefer starting the servers manually:
+Before running the tests these commands will start the test server in which the browsers will run (when `PRE_OR_POST_DEPLOY` is `pre`), and if `TEST_ENVIRONMENT` is `local` they will also start the frontend server. These servers are also stopped once the tests have run. Starting the servers can take some time. If you’re writing or updating tests and will need to frequently run them whilst doing so then prefer starting the servers manually:
 
 To run the test server:
 
@@ -62,11 +58,11 @@ cd /solutions/integration-tests
 npm run start-test-server
 ```
 
-To run the application servers:
+To run the frontend server:
 
 ```bash
 cd /solutions/integration-tests
-npm run run:all
+npm run start-frontend
 ```
 
 With the servers already running the tests will execute more quickly as they don't need to wait for the servers to start.

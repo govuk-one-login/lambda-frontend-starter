@@ -1,3 +1,0 @@
-bucket = "di-account-components-build-tfstate"
-key    = "account-components.tfstate"
-region = "eu-west-2"

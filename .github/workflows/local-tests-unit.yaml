@@ -9,8 +9,6 @@ on:
 jobs:
   local-tests-unit:
     runs-on: ubuntu-latest
-    permissions:
-      packages: read
 
     steps:
       - name: Checkout
@@ -24,9 +22,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run install-all
+        run: npm ci
 
       - name: Test
         run: npm run test:coverage
