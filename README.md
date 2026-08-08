@@ -61,7 +61,7 @@
   - Allowed services: EC2 (required to attach lambdas to VPC), DynamoDB, Lambda (required for canaries), Xray
   - `DynatraceApiEnabled`: `Yes` (see https://github.com/govuk-one-login/observability-infrastructure/blob/6cd6a5a26493ef08b99e4c88276a1b8c3b9ec1ff/lambdalayer/README.md?plain=1#L16)
 - Find and action all instances of `CHANGEME` and `changme`
-- Retain the contents of this README file below to following horizontal rule, and then read them for further context
+- Retain the contents of this README file below to following horizontal rule, and then read them for further context and setup instructions
 
 ---
 
