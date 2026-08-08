@@ -36,7 +36,7 @@ jobs:
           NODE_ENV=production
           USE_LOCAL_AWS=1
           SESSIONS_SIGNER=localsessionsignerwhichmustbeatleast32chars
-          SESSIONS_TABLE_NAME=changme-SessionStore # replace changme with the value of AWS::StackName in solutions/app-infra/template.yaml
+          SESSIONS_TABLE_NAME=changeme-SessionStore # replace changeme with the value of AWS::StackName in solutions/app-infra/template.yaml
           ROOT_DOMAIN_WITH_ENV=localhost
           AWS_REGION=eu-west-2
           LOCAL_AWS_ENDPOINT=http://localhost:4566

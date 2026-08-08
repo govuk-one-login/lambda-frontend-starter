@@ -7,9 +7,9 @@
   },
   "scripts": {
     "start-frontend": "cd ../../ && export IS_INTEGRATION_TEST=1; npm run start",
-    "build": "docker build -t changme-integration-test .",
+    "build": "docker build -t changeme-integration-test .",
     "install-browsers": "playwright install --with-deps chromium",
-    "start-test-server": "npm run build && docker run --name changme-integration-test --network=host --rm --init changme-integration-test run-server",
+    "start-test-server": "npm run build && docker run --name changeme-integration-test --network=host --rm --init changeme-integration-test run-server",
     "watch": "nodemon -w ./tests -w ./utils -w ./.env.ts -w ./.env -e \"*\" --exec \"bddgen\"",
     "test": "npm ci && bddgen && playwright test",
     "test:update-snapshots": "bash update-snapshots.sh",

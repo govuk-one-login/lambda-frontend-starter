@@ -9,7 +9,7 @@ export AWS_DEFAULT_REGION="eu-west-2"
 
 FLOCI_ENDPOINT="http://localhost:4566"
 LOCAL_KMS_ENDPOINT="http://localhost:4567"
-STACK_NAME="changme" # The value should be the same as the value of AWS::StackName in solutions/app-infra/template.yaml
+STACK_NAME="changeme" # The value should be the same as the value of AWS::StackName in solutions/app-infra/template.yaml
 DOCKER_NETWORK_NAME="$STACK_NAME-network"
 FLOCI_CONTAINER_NAME="$STACK_NAME-floci"
 LOCAL_KMS_CONTAINER_NAME="$STACK_NAME-local-kms"
