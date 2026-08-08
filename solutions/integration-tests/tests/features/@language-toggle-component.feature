@@ -1,3 +1,4 @@
+@skipMobile
 Feature: Language switcher
 
   Scenario: Defaults to English

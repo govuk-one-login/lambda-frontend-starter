@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
-      packages: read
 
     steps:
       - name: Checkout
@@ -26,9 +25,6 @@ jobs:
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version-file: .nvmrc
-
-      - name: Set up tflint
-        uses: terraform-linters/setup-tflint@6e1e0642c0289bd619021bf6b34e3c08ed1e005a
 
       - name: Set up SAM CLI
         uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310
@@ -45,14 +41,10 @@ jobs:
         run: "pip install --require-hashes --only-binary :all: -r .github/workflows/requirements.txt"
 
       - name: Install dependencies
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run install-all
+        run: npm ci && cd solutions/integration-tests && npm ci
 
       - name: Build
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:all
+        run: npm run build
 
       - name: Cache pre-commit environments
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
@@ -63,37 +55,3 @@ jobs:
 
       - name: Run pre-commit
         run: pre-commit run --all-files --show-diff-on-failure
-
-      - name: Validate passkeys convenience metadata
-        run: |
-          npx tsx -e '
-            import { getAllPasskeyConvenienceMetadata } from "./solutions/commons/utils/passkeysConvenienceMetadata/index.ts";
-
-            getAllPasskeyConvenienceMetadata().then((metadata) => {
-              console.log("Metadata is valid");
-            }).catch((err: unknown) => {
-              throw err
-            });
-          '
-
-      - name: Checkov
-        uses: bridgecrewio/checkov-action@d9d1e5cdc53e3a91f0c4c58db7bc19ee31cac7e5
-        with:
-          directory: .
-          output_format: cli
-          output_file_path: console
-          # skip_path skips solutions/app-infra/template.yaml due to a checkov bug where Fn::If
-          # inside SAM Globals causes a ValueError crash (invalid literal for int() with base 10: 'Fn::If').
-          # cfn-lint still runs against this template via the cfnlint CI step.
-          # See: https://github.com/bridgecrewio/checkov/issues/6804
-          skip_path: solutions/app-infra/template.yaml,submodules/.+
-          # to select the deployment revision, not to affect build output.
-          # CKV2_GHA_1 flags missing top-level permissions but all jobs in affected workflows
-          # already define their own explicit permissions, making a top-level block redundant.
-          # CKV_OPENAPI_21 flags omitting maxItems leaves arrays unbounded, created OLH-4092
-          # CKV_OPENAPI_4 and CKV_OPENAPI_5 flag empty security but public endpoints
-          # (token, authorize, .well-known) intentionally have no authentication
-          # CKV_AWS_18 flags missing S3 access logging and CKV_AWS_111 flags IAM policies
-          # without write access constraints, created OLH-4093 to implement
-          # CKV_AWS_124 Intentionally ommitted as SNS topics do not exist.
-          skip_check: CKV2_GHA_1,CKV_OPENAPI_21,CKV_OPENAPI_4,CKV_OPENAPI_5,CKV_AWS_18,CKV_AWS_111,CKV_AWS_124

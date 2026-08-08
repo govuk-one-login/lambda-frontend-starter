@@ -1,0 +1,6 @@
+CHANGEME
+
+This commons solution is where things should be kept which need to be imported by multiple other solutions.
+ESLint is configured to enforce this relationship.
+
+This file can be deleted.

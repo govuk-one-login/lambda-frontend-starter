@@ -6,21 +6,6 @@
     "back": "Back",
     "phaseBanner": {
       "testText": "This is a test environment."
-    },
-    "header": {
-      "productName": "One Login",
-      "signOutLink": "Sign out",
-      "accountNavLabel": "Account navigation",
-      "accountNavHomeLinkText": "Your services",
-      "accountNavSecurityLinkText": "Security"
-    },
-    "passwordInput": {
-      "show": "Show",
-      "hide": "Hide",
-      "showFullText": "Show password",
-      "hideFullText": "Hide password",
-      "announceShown": "Your password is shown",
-      "announceHidden": "Your password is hidden"
     }
   },
   "error": {
@@ -40,14 +25,21 @@
       "content": {
         "paragraph1": "Try again later."
       }
-    },
-    "timeoutError": {
-      "title": "Sorry, the page has expired",
-      "header": "Sorry, the page has expired",
-      "paragraph1": "This is because you have not used GOV.UK One Login for more than 30 minutes.",
-      "subheading": "What you can do",
-      "paragraph2": "Cancel this page and try again.",
-      "buttonText": "Go to the GOV.UK homepage"
     }
+  },
+  "examplePage": {
+    "pageTitle": "What is the best pet?",
+    "heading": "What is the best pet?",
+    "bestPetRadioButtonsLegendText": "Select your favourite pet. Let's settle this once and for all.",
+    "bestPetRadioButtons": {
+      "cats": "Cats, of course",
+      "dogs": "Dogs, obviously"
+    },
+    "bestPetFormSubmitButtonLabel": "Let's go",
+    "bestPetNoChoiceErrorMessage": "Get off the fence and pick a pet",
+    "bestPetWrongChoiceErrorMessage": "You couldn't be more wrong. Try again.",
+    "bestPetSuccessMessage": "Woof",
+    "bestPetSuccessAriaLabel": "Good dog says woof",
+    "bestPetFormTryAgainSubmitButtonLabel": "Try again"
   }
 }

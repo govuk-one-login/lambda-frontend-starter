@@ -1,48 +1,43 @@
-import { removeTrailingSlash } from "../../commons/utils/fastify/removeTrailingSlash/index.js";
-import { addDefaultCaching } from "../../commons/utils/fastify/addDefaultCaching/index.js";
+import { removeTrailingSlash } from "./utils/fastify/removeTrailingSlash/index.js";
+import { addDefaultCaching } from "./utils/fastify/addDefaultCaching/index.js";
 import Fastify from "fastify";
 import fastifyCookie from "@fastify/cookie";
-import { render } from "../../commons/utils/fastify/render/index.js";
+import { render } from "./utils/fastify/render/index.js";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyHelmet from "@fastify/helmet";
 import fastifySession from "@fastify/session";
-import { journeyRoutes } from "./journeys/index.js";
 import en from "./translations/en.json" with { type: "json" };
 import cy from "./translations/cy.json" with { type: "json" };
-import { getSessionOptions } from "./utils/session.js";
+import { getSessionOptions } from "./utils/session/index.js";
 import fastifyStatic from "@fastify/static";
 import * as path from "node:path";
-import {
-  channelCookieName,
-  Lang,
-  oneYearInSeconds,
-} from "../../commons/utils/constants.js";
+import { Lang } from "./utils/constants.js";
 import staticHash from "./utils/static-hash.json" with { type: "json" };
-import simpleWebAuthNBrowserStaticHash from "./utils/static-hash-simplewebauthn-browser.json" with { type: "json" };
-import staticHashGovUkFrontendAssets from "./utils/static-hash-govuk-frontend-assets.json" with { type: "json" };
 import staticHashGovUkFrontend from "./utils/static-hash-govuk-frontend.json" with { type: "json" };
+import staticHashGovUkFrontendAssets from "./utils/static-hash-govuk-frontend-assets.json" with { type: "json" };
 import staticHashGovUkOneLoginFrontendDeviceIntelligence from "./utils/static-hash-govuk-one-login-frontend-device-intelligence.json" with { type: "json" };
 import staticHashGovUkOneLoginFrontendAnalytics from "./utils/static-hash-govuk-one-login-frontend-analytics.json" with { type: "json" };
-import { csrfProtection } from "./utils/csrfProtection.js";
-import { addStaticAssetsCachingHeaders } from "../../commons/utils/fastify/addStaticAssetsCachingHeaders/index.js";
+import { csrfProtection } from "./utils/csrfProtection/index.js";
+import { addStaticAssetsCachingHeaders } from "./utils/fastify/addStaticAssetsCachingHeaders/index.js";
 import i18next from "i18next";
 import {
   plugin as i18nextMiddlewarePlugin,
   handle as i18nextMiddlewareHandle,
 } from "i18next-http-middleware";
-import { getCurrentUrl } from "../../commons/utils/fastify/getCurrentUrl/index.js";
-import { configureI18n } from "./utils/configureI18n.js";
+import { getCurrentUrl } from "./utils/fastify/getCurrentUrl/index.js";
+import { configureI18n } from "./utils/configureI18n/index.js";
 import {
   frontendUiTranslationCy,
   frontendUiTranslationEn,
 } from "@govuk-one-login/frontend-ui";
-import { paths } from "./utils/paths.js";
-import { getEnvironment } from "../../commons/utils/getEnvironment/index.js";
-import { FastifyPowertoolsLogger } from "../../commons/utils/fastify/powertoolsLogger/index.js";
-import { resolveEnvVarToBool } from "../../commons/utils/resolveEnvVarToBool/index.js";
-import { simpleUnsuccessfulJourneyActionErrors } from "./journeys/utils/journeyActions.js";
+import { getEnvironment } from "./utils/getEnvironment/index.js";
+import { FastifyPowertoolsLogger } from "./utils/fastify/powertoolsLogger/index.js";
+import { resolveEnvVarToBool } from "./utils/resolveEnvVarToBool/index.js";
 import { setAnalyticsForPath } from "./utils/setAnalyticsForPath/index.js";
-import { FastifyLogController } from "../../commons/utils/fastify/logController/index.js";
+import { FastifyLogController } from "./utils/fastify/logController/index.js";
+import { paths } from "./utils/paths.js";
+import assert from "node:assert";
+import { getHelmetConfig } from "./utils/fastify/getHelmetConfig/index.js";
 
 await configureI18n({
   [Lang.English]: {
@@ -73,46 +68,38 @@ export const initFrontend = async function () {
   fastify.addHook("onRequest", i18nextMiddlewareHandle(i18next));
 
   fastify.addHook("onRequest", async (request, reply) => {
+    assert.ok(process.env["AUTH_FRONTEND_URL"]);
+    assert.ok(process.env["ANALYTICS_COOKIE_DOMAIN"]);
+    assert.ok(process.env["GA4_CONTAINER_ID"]);
+
     reply.globals = {
       ...reply.globals,
       staticHash: staticHash.hash,
-      simpleWebAuthNBrowserStaticHash: simpleWebAuthNBrowserStaticHash.hash,
       assetsHash: staticHashGovUkFrontendAssets.hash,
       publicScriptsHash:
         staticHashGovUkFrontend.hash +
         staticHashGovUkOneLoginFrontendAnalytics.hash,
       fingerprintHash: staticHashGovUkOneLoginFrontendDeviceIntelligence.hash,
       currentUrl: getCurrentUrl(request),
-      htmlLang: request.i18n.language,
+      lng: request.i18n.language,
       authFrontEndUrl: process.env["AUTH_FRONTEND_URL"],
       analyticsCookieDomain: process.env["ANALYTICS_COOKIE_DOMAIN"],
       ga4ContainerId: process.env["GA4_CONTAINER_ID"],
       analyticsEnabled: resolveEnvVarToBool("ANALYTICS_ENABLED"),
-      simpleUnsuccessfulJourneyActionErrors,
-      contactUrl: process.env["CONTACT_URL"],
-      yourServicesUrl: process.env["YOUR_SERVICES_URL"],
-      securityUrl: process.env["SECURITY_URL"],
-      dynatraceRumUrl: process.env["DYNATRACE_RUM_URL"],
       env: getEnvironment(),
-      isAppChannel:
-        request.cookies[channelCookieName] === "strategic_app" ||
-        request.cookies[channelCookieName] === "generic_app",
     };
   });
   fastify.addHook("onRequest", setAnalyticsForPath);
   fastify.decorateReply("render", render);
 
   fastify.setNotFoundHandler(async function (request, reply) {
-    const onNotFound = (
-      await import("../../commons/utils/fastify/onNotFoundHandler/index.js")
-    ).onNotFound;
+    const onNotFound = (await import("./handlers/onNotFound/index.js"))
+      .onNotFound;
     return onNotFound.bind(this)(request, reply);
   });
 
   fastify.setErrorHandler(async function (error, request, reply) {
-    const onError = (
-      await import("../../commons/utils/fastify/onErrorHandler/index.js")
-    ).onError;
+    const onError = (await import("./handlers/onError/index.js")).onError;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return onError.bind(this)(error, request, reply);
   });
@@ -169,21 +156,6 @@ export const initFrontend = async function () {
     },
   });
 
-  fastify.register(fastifyStatic, {
-    root: [
-      path.join(
-        import.meta.dirname,
-        "/node_modules/@simplewebauthn/browser/dist/bundle",
-      ),
-    ],
-    prefix: "/@simplewebauthn/browser",
-    decorateReply: false,
-    cacheControl: false,
-    setHeaders: (res) => {
-      addStaticAssetsCachingHeaders(res, true);
-    },
-  });
-
   fastify.get("/healthcheck", async function (_request, reply) {
     await reply.send("ok");
     return reply;
@@ -196,94 +168,28 @@ export const initFrontend = async function () {
     );
   });
 
-  fastify.get(
-    paths.others.authorizeError.path,
-    async function (request, reply) {
-      return (await import("./handlers/authorizeError/index.js")).handler(
-        request,
-        reply,
-      );
-    },
-  );
-
-  fastify.get(paths.others.pageExpired.path, async function (request, reply) {
-    return (await import("./handlers/pageExpired/index.js")).handler(
-      request,
-      reply,
-    );
-  });
-
   fastify.register(fastifyFormbody);
-  fastify.register(fastifyHelmet, {
-    enableCSPNonces: true,
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: [
-          "'self'",
-          "https://*.googletagmanager.com",
-          "https://*.google-analytics.com",
-          "https://*.analytics.google.com",
-          "https://*.ruxit.com",
-          "https://*.dynatrace.com",
-        ],
-        imgSrc: [
-          "'self'",
-          "data:",
-          "https://*.googletagmanager.com",
-          "https://*.google-analytics.com",
-          "https://*.analytics.google.com",
-          "https://*.g.doubleclick.net",
-        ],
-        objectSrc: ["'none'"],
-        connectSrc: [
-          "'self'",
-          "https://*.google-analytics.com",
-          "https://*.analytics.google.com",
-          "https://*.g.doubleclick.net",
-          "https://*.ruxit.com",
-          "https://*.dynatrace.com",
-        ],
-        formAction:
-          getEnvironment() === "local"
-            ? ["'self'", "http://localhost:*"]
-            : ["'self'", "https://*.account.gov.uk"],
-        ...(getEnvironment() === "local"
-          ? {
-              upgradeInsecureRequests: null,
-            }
-          : {}),
-      },
-    },
-    dnsPrefetchControl: {
-      allow: false,
-    },
-    frameguard: {
-      action: "deny",
-    },
-    hsts: {
-      maxAge: oneYearInSeconds,
-      preload: true,
-      includeSubDomains: true,
-    },
-    referrerPolicy: false,
-    permittedCrossDomainPolicies: {
-      permittedPolicies: "none",
-    },
-  });
+  fastify.register(fastifyHelmet, getHelmetConfig());
 
   fastify.register(async (fastify) => {
     fastify.register(fastifySession, await getSessionOptions());
     fastify.register(csrfProtection);
 
-    fastify.get(paths.others.authorize.path, async function (request, reply) {
-      return (await import("./handlers/authorize/index.js")).getHandler(
+    // CHANGEME remove this example route and associated files in solutions/frontend/src/handlers/examplePage/
+    fastify.get(paths.examplePage.path, async function (request, reply) {
+      return (await import("./handlers/examplePage/index.js")).getHandler(
         request,
         reply,
       );
     });
 
-    fastify.register(journeyRoutes);
+    // CHANGEME remove this example route and associated files in solutions/frontend/src/handlers/examplePage/
+    fastify.post(paths.examplePage.path, async function (request, reply) {
+      return (await import("./handlers/examplePage/index.js")).postHandler(
+        request,
+        reply,
+      );
+    });
   });
 
   return fastify;
