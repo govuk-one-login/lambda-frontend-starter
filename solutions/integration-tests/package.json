@@ -11,9 +11,9 @@
     "install-browsers": "playwright install --with-deps chromium",
     "start-test-server": "npm run build && docker run --name changeme-integration-test --network=host --rm --init changeme-integration-test run-server",
     "watch": "nodemon -w ./tests -w ./utils -w ./.env.ts -w ./.env -e \"*\" --exec \"bddgen\"",
-    "test": "npm ci && bddgen && playwright test",
+    "test": "npm ci --ignore-scripts && bddgen && playwright test",
     "test:update-snapshots": "bash update-snapshots.sh",
-    "test:ui": "npm ci && run-p test:ui:*",
+    "test:ui": "npm ci --ignore-scripts && run-p test:ui:*",
     "test:ui:watch": "npm run watch",
     "test:ui:run": "playwright test --ui",
     "audit": "npm audit --audit-level=moderate --omit=dev && npm audit signatures"

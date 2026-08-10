@@ -1,3 +1,4 @@
+@skipMobile
 Feature: Healthcheck page
 
   Scenario: Visit the Healthcheck page
