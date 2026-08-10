@@ -89,128 +89,52 @@ describe("csrfProtection", () => {
     );
   });
 
-  it("should generate CSRF token and skip protection for GET requests", async () => {
-    await csrfProtection(fastify as FastifyInstance);
+  it.each(["GET", "HEAD", "OPTIONS"])(
+    "should generate CSRF token and skip protection for %s requests",
+    async (method) => {
+      await csrfProtection(fastify as FastifyInstance);
 
-    const hookCall = vi.mocked(fastify.addHook!).mock.calls[0];
-    const preHandler = hookCall![1] as (
-      req: FastifyRequest,
-      reply: FastifyReply,
-      // Accept any callable (e.g., vitest mock) for the done callback in tests
-      // to avoid overly strict typing during unit testing.
-      done: unknown,
-    ) => void;
+      const hookCall = vi.mocked(fastify.addHook!).mock.calls[0];
+      const preHandler = hookCall![1] as (
+        req: FastifyRequest,
+        reply: FastifyReply,
+        // Accept any callable (e.g., vitest mock) for the done callback in tests
+        // to avoid overly strict typing during unit testing.
+        done: unknown,
+      ) => void;
 
-    // @ts-expect-error
-    request.method = "GET";
-    preHandler(request as FastifyRequest, reply as FastifyReply, done);
+      // @ts-expect-error
+      request.method = method;
+      preHandler(request as FastifyRequest, reply as FastifyReply, done);
 
-    expect(reply.globals!.csrfToken).toBe("csrf-token-123");
-    expect(fastify.csrfProtection).not.toHaveBeenCalled();
-    expect(done).toHaveBeenCalledExactlyOnceWith();
-  });
+      expect(reply.globals!.csrfToken).toBe("csrf-token-123");
+      expect(fastify.csrfProtection).not.toHaveBeenCalled();
+      expect(done).toHaveBeenCalledExactlyOnceWith();
+    },
+  );
 
-  it("should generate CSRF token and skip protection for HEAD requests", async () => {
-    await csrfProtection(fastify as FastifyInstance);
+  it.each(["POST", "PUT", "DELETE"])(
+    "should generate CSRF token and apply protection for %s requests",
+    async (method) => {
+      await csrfProtection(fastify as FastifyInstance);
 
-    const hookCall = vi.mocked(fastify.addHook!).mock.calls[0];
-    const preHandler = hookCall![1] as (
-      req: FastifyRequest,
-      reply: FastifyReply,
-      done: unknown,
-    ) => void;
+      const hookCall = vi.mocked(fastify.addHook!).mock.calls[0];
+      const preHandler = hookCall![1] as (
+        req: FastifyRequest,
+        reply: FastifyReply,
+        done: unknown,
+      ) => void;
 
-    // @ts-expect-error
-    request.method = "HEAD";
-    preHandler(request as FastifyRequest, reply as FastifyReply, done);
+      // @ts-expect-error
+      request.method = method;
+      preHandler(request as FastifyRequest, reply as FastifyReply, done);
 
-    expect(reply.globals!.csrfToken).toBe("csrf-token-123");
-    expect(fastify.csrfProtection).not.toHaveBeenCalled();
-    expect(done).toHaveBeenCalledExactlyOnceWith();
-  });
-
-  it("should generate CSRF token and skip protection for OPTIONS requests", async () => {
-    await csrfProtection(fastify as FastifyInstance);
-
-    const hookCall = vi.mocked(fastify.addHook!).mock.calls[0];
-    const preHandler = hookCall![1] as (
-      req: FastifyRequest,
-      reply: FastifyReply,
-      done: unknown,
-    ) => void;
-
-    // @ts-expect-error
-    request.method = "OPTIONS";
-    preHandler(request as FastifyRequest, reply as FastifyReply, done);
-
-    expect(reply.globals!.csrfToken).toBe("csrf-token-123");
-    expect(fastify.csrfProtection).not.toHaveBeenCalled();
-    expect(done).toHaveBeenCalledExactlyOnceWith();
-  });
-
-  it("should generate CSRF token and apply protection for POST requests", async () => {
-    await csrfProtection(fastify as FastifyInstance);
-
-    const hookCall = vi.mocked(fastify.addHook!).mock.calls[0];
-    const preHandler = hookCall![1] as (
-      req: FastifyRequest,
-      reply: FastifyReply,
-      done: unknown,
-    ) => void;
-
-    // @ts-expect-error
-    request.method = "POST";
-    preHandler(request as FastifyRequest, reply as FastifyReply, done);
-
-    expect(reply.globals!.csrfToken).toBe("csrf-token-123");
-    expect(fastify.csrfProtection).toHaveBeenCalledExactlyOnceWith(
-      request,
-      reply,
-      done,
-    );
-  });
-
-  it("should generate CSRF token and apply protection for PUT requests", async () => {
-    await csrfProtection(fastify as FastifyInstance);
-
-    const hookCall = vi.mocked(fastify.addHook!).mock.calls[0];
-    const preHandler = hookCall![1] as (
-      req: FastifyRequest,
-      reply: FastifyReply,
-      done: unknown,
-    ) => void;
-
-    // @ts-expect-error
-    request.method = "PUT";
-    preHandler(request as FastifyRequest, reply as FastifyReply, done);
-
-    expect(reply.globals!.csrfToken).toBe("csrf-token-123");
-    expect(fastify.csrfProtection).toHaveBeenCalledExactlyOnceWith(
-      request,
-      reply,
-      done,
-    );
-  });
-
-  it("should generate CSRF token and apply protection for DELETE requests", async () => {
-    await csrfProtection(fastify as FastifyInstance);
-
-    const hookCall = vi.mocked(fastify.addHook!).mock.calls[0];
-    const preHandler = hookCall![1] as (
-      req: FastifyRequest,
-      reply: FastifyReply,
-      done: unknown,
-    ) => void;
-
-    // @ts-expect-error
-    request.method = "DELETE";
-    preHandler(request as FastifyRequest, reply as FastifyReply, done);
-
-    expect(reply.globals!.csrfToken).toBe("csrf-token-123");
-    expect(fastify.csrfProtection).toHaveBeenCalledExactlyOnceWith(
-      request,
-      reply,
-      done,
-    );
-  });
+      expect(reply.globals!.csrfToken).toBe("csrf-token-123");
+      expect(fastify.csrfProtection).toHaveBeenCalledExactlyOnceWith(
+        request,
+        reply,
+        done,
+      );
+    },
+  );
 });
