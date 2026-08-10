@@ -77,7 +77,7 @@ This repo contains the code for CHANGEME
 - Install Docker
 - Install [Homebrew](https://brew.sh/)
 - Install Brewfile dependencies with `npm run install-brewfile`
-- Install dependencies with `npm ci`
+- Install dependencies with `npm ci --ignore-scripts`
 - Install Git Hooks with `npm run install-git-hooks`
 - Run `npm run start` to run the frontend. It will be available at `http://localhost:6002` and will watch for changes and rebuild on demand.
 
