@@ -6,8 +6,8 @@ export const getBaseUrl = () => {
   }
 
   if (env.TEST_TARGET === "production") {
-    return "https://manage.account.gov.uk";
+    return "https://manage.account.gov.uk"; // CHANGEME update this accordingly
   }
 
-  return `https://manage.${env.TEST_TARGET}.account.gov.uk`;
+  return `https://manage.${env.TEST_TARGET}.account.gov.uk`; // CHANGEME update this accordingly
 };

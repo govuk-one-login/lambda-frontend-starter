@@ -1,0 +1,68 @@
+{% extends "templates/layout/base-page.njk" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+
+{% set pageTitleName = 'examplePage.pageTitle' | translate %}
+{% set englishPageTitleName = 'examplePage.pageTitle' | getFixedT_en %} 
+
+{% block pageContent %}
+  <h1 class="govuk-heading-l">{{ 'examplePage.heading' | translate }}</h1>
+
+  {% if bestPet %}
+
+    <pre role="img" aria-label="{{ 'examplePage.bestPetSuccessAriaLabel' | translate }}">
+        |\_/|                  
+        | @ @   {{ 'examplePage.bestPetSuccessMessage' | translate }}
+        |   <>              _  
+        |  _/\------____ ((| |))
+        |               `--' |   
+    ____|_       ___|   |___.' 
+    /_/_____/____/_______|  
+    </pre>
+
+    <form method="post">
+      <input type="hidden" name="reset" value="1"> 
+      <input type="hidden" name="_csrf" value="{{ globals.csrfToken }}"> 
+
+      {{ govukButton({
+        text: 'examplePage.bestPetFormTryAgainSubmitButtonLabel' | translate,
+        preventDoubleClick: true
+      }) }}
+    </form>    
+
+  {% else %}
+
+    <form method="post">
+      {{ govukRadios({
+        name: "bestPet",
+        fieldset: {
+          legend: {
+            text: 'examplePage.bestPetRadioButtonsLegendText' | translate,
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        items: [
+          {
+            value: "cats",
+            text: 'examplePage.bestPetRadioButtons.cats' | translate
+          },
+          {
+            value: "dogs",
+            text: 'examplePage.bestPetRadioButtons.dogs' | translate
+          }
+        ],
+        errorMessage: {
+          text: errors["bestPet"].text
+        } if (errors["bestPet"])        
+      }) }}
+
+      <input type="hidden" name="_csrf" value="{{ globals.csrfToken }}"> 
+
+      {{ govukButton({
+        text: 'examplePage.bestPetFormSubmitButtonLabel' | translate,
+        preventDoubleClick: true
+      }) }}
+    </form>
+    
+  {% endif %}
+{% endblock %}

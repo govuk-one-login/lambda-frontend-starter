@@ -7,13 +7,13 @@
 
 {% set acceptHtml %}
   <p class="govuk-body">{{ 'FECTranslations.cookieBanner.cookieBannerAccept.body1' | translate }}
-  <a class="govuk-link" href="https://signin.account.gov.uk/cookies">{{ 'FECTranslations.cookieBanner.changeCookiePreferencesLink' | translate }}</a>
+  <a class="govuk-link" href="{{ globals.authFrontendUrl }}/cookies">{{ 'FECTranslations.cookieBanner.changeCookiePreferencesLink' | translate }}</a>
   {{ 'FECTranslations.cookieBanner.cookieBannerAccept.body2' | translate }}</p>
 {% endset %}
 
 {% set rejectedHtml %}
 <p class="govuk-body">{{ 'FECTranslations.cookieBanner.cookieBannerReject.body1' | translate }}
-  <a class="govuk-link" href="https://signin.account.gov.uk/cookies">{{ 'FECTranslations.cookieBanner.changeCookiePreferencesLink' | translate }}</a>
+  <a class="govuk-link" href="{{ globals.authFrontendUrl }}/cookies">{{ 'FECTranslations.cookieBanner.changeCookiePreferencesLink' | translate }}</a>
   {{ 'FECTranslations.cookieBanner.cookieBannerReject.body2' | translate }}
 </p>
 {% endset %}

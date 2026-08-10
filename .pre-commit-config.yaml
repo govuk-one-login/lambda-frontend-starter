@@ -47,49 +47,17 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
-  - repo: local
-    hooks:
-      - id: validate-config
-        name: Validate config
-        entry: npm run config:validate
-        language: system
-        exclude: .*
-        always_run: true
-        pass_filenames: false
-        stages: [pre-commit]
-
-  - repo: local
-    hooks:
-      - id: validate-api-specs
-        name: Validate API Specs
-        entry: npm run api-specs:validate
-        language: system
-        exclude: .*
-        always_run: true
-        pass_filenames: false
-        stages: [pre-commit]
-
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     rev: e3eebf65325ccc992422292cb7a4baee967cf815 # pragma: allowlist secret
     hooks:
       - id: zizmor
+        stages: [pre-commit]
 
   - repo: local
     hooks:
       - id: eslint
         name: ESLint
         entry: npm run eslint
-        language: system
-        exclude: .*
-        always_run: true
-        pass_filenames: false
-        stages: [pre-commit]
-
-  - repo: local
-    hooks:
-      - id: tflint
-        name: Lint Terraform
-        entry: npm run tflint
         language: system
         exclude: .*
         always_run: true
@@ -109,22 +77,20 @@ repos:
 
   - repo: local
     hooks:
-      - id: cfnlint
-        name: Lint CloudFormation
-        entry: npm run cfnlint
+      - id: knip
+        name: Knip
+        entry: npm run knip
         language: system
         exclude: .*
         always_run: true
         pass_filenames: false
         stages: [pre-commit]
 
-  - repo: local
+  - repo: https://github.com/bridgecrewio/checkov.git
+    rev: bb451c5c4ae66a948eb8af386d0079e16a8ca0aa # pragma: allowlist secret
     hooks:
-      - id: knip
-        name: Knip
-        entry: npm run knip
-        language: system
-        exclude: .*
+      - id: checkov
+        entry: npm run checkov
         always_run: true
         pass_filenames: false
         stages: [pre-commit]

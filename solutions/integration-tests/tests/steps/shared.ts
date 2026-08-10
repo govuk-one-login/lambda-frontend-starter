@@ -2,23 +2,12 @@ import { AxeBuilder } from "@axe-core/playwright";
 import { bdd } from "./fixtures.js";
 import { expect } from "@playwright/test";
 import assert from "node:assert";
-import { getStubsUrl } from "../../utils/getStubsUrl.js";
-import * as v from "valibot";
-import * as yaml from "yaml";
-import { getApiBaseUrl } from "../../utils/getApiBaseUrl.js";
 
 const { Then, Given } = bdd;
-
-const stubsUrl = getStubsUrl();
 
 export const pageNameToPath: Record<string, string> = {
   "Non-existent page": "/non-existent-page",
   Healthcheck: "/healthcheck",
-  "Authorize error": "/error",
-  "Testing journey - step 1": "/testing-journey/step-1",
-  "Testing journey - enter password": "/testing-journey/enter-password",
-  "Testing journey - confirmation": "/testing-journey/confirm",
-  "Page expired": "/page-expired",
 };
 
 Then("the page meets our accessibility standards", async ({ page }) => {
@@ -35,66 +24,6 @@ Given("I go to the {string} page", async ({ page }, pageName: string) => {
   await page.goto(pageNameToPath[pageName]);
 });
 
-Given("I go to the journey initiator", async ({ page }) => {
-  await page.goto(stubsUrl);
-});
-
-Given("I begin a {string} journey", async ({ page }, scope: string) => {
-  const legend = page.locator('legend:has-text("Scopes")');
-  const fieldset = page.locator("fieldset").filter({ has: legend });
-  await fieldset.getByLabel(scope).check();
-  await page
-    .getByRole("button", { name: "Generate Request Object", exact: true })
-    .click();
-  await page
-    .getByRole("link", { name: "Start AMC Journey", exact: true })
-    .click();
-});
-
-Given("I click the {string} link", async ({ page }, linkLabel: string) => {
-  await page.getByRole("link", { name: linkLabel, exact: true }).click();
-});
-
-Given("I click the {string} button", async ({ page }, name: string) => {
-  await page.getByRole("button", { name, exact: true }).click();
-});
-
-Given("I click the {string} element", async ({ page }, text: string) => {
-  await page.getByText(text, { exact: true }).click();
-});
-
-Then(
-  "the page title is prefixed with {string}",
-  async ({ page }, pageTitlePrefix: string) => {
-    await expect(page).toHaveTitle(
-      // @ts-expect-error
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions
-      new RegExp(`^${RegExp.escape(`${pageTitlePrefix} - GOV.UK One Login`)}`),
-    );
-  },
-);
-
-Then("the page title is {string}", async ({ page }, pageTitle: string) => {
-  await expect(page).toHaveTitle(pageTitle);
-});
-
-Then("the page path is {string}", async ({ page }, pageName: string) => {
-  await expect(page).toHaveURL((url) => {
-    return url.pathname === pageNameToPath[pageName];
-  });
-});
-
-Then("the page contains the text {string}", async ({ page }, text: string) => {
-  await expect(page.getByText(new RegExp(text))).toBeVisible();
-});
-
-Then(
-  "the page does not contain the text {string}",
-  async ({ page }, text: string) => {
-    await expect(page.getByText(new RegExp(text))).toBeHidden();
-  },
-);
-
 Then("the page looks as expected", async ({ page }) => {
   // eslint-disable-next-line playwright/no-networkidle
   await page.waitForLoadState("networkidle");
@@ -110,153 +39,12 @@ Then("the page looks as expected", async ({ page }) => {
   });
 });
 
-Then("I click the browser's back button", async ({ page }) => {
-  await page.goBack();
-});
-
-Given(
-  "I select the option beginning with {string} in the {string} select",
-  async ({ page }, selectOptionPartialLabel: string, label: string) => {
-    const select = page.getByLabel(label);
-
-    await expect(select).toHaveCount(1);
-
-    const options = await select.getByRole("option").all();
-    const optionsTextContent = (
-      await Promise.all(options.map((option) => option.textContent()))
-    ).filter((optionTextContent) => optionTextContent !== null);
-    const optionTextContent = optionsTextContent.find((optionTextContent) => {
-      return optionTextContent.startsWith(selectOptionPartialLabel);
-    });
-
-    if (!optionTextContent) {
-      expect(
-        false,
-        `Option begining with "${selectOptionPartialLabel}" not found in "${label}" select`,
-      ).toBe(true);
-      return;
-    }
-
-    await select.selectOption(optionTextContent);
-  },
-);
-
-Given(
-  "I select the option beginning with {string} in the {string} radio button group",
-  async (
-    { page },
-    radioButtonGroupOptionPartialLabel: string,
-    radioButtonGroupPartialLabel: string,
-  ) => {
-    const radioButtonGroup = page.getByRole("group", {
-      name: new RegExp(`^${radioButtonGroupPartialLabel}`),
-    });
-
-    const radioButton = radioButtonGroup.getByRole("radio", {
-      name: new RegExp(`^${radioButtonGroupOptionPartialLabel}`),
-    });
-
-    await expect(radioButton).toHaveCount(1);
-
-    await radioButton.check();
-  },
-);
-
-Given(
-  "I fill the input with the label beginning with {string} with the text {string}",
-  async ({ page }, inputPartialLabel: string, text: string) => {
-    const input = page.getByRole("textbox", {
-      name: new RegExp(`^${inputPartialLabel}`),
-    });
-
-    await expect(input).toHaveCount(1);
-
-    await input.fill(text);
-  },
-);
-
-Then("the {word} cookie has been set", async ({ page }, cookieName) => {
+Then("the {string} cookie has been set", async ({ page }, cookieName) => {
   // eslint-disable-next-line playwright/no-networkidle
   await page.waitForLoadState("networkidle");
   const cookies = await page.context().cookies();
   const expectedCookie = cookies.find((cookie) => cookie.name === cookieName);
   expect(expectedCookie).toBeDefined();
-});
-
-Given(
-  "I make an API request with the config:",
-  async ({ scenarioData }, configString: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const unsafeConfig = yaml.parse(configString);
-
-    const configSchema = v.object({
-      method: v.picklist([
-        "GET",
-        "PUT",
-        "POST",
-        "PATCH",
-        "DELETE",
-        "OPTIONS",
-        "HEAD",
-        "CONNECT",
-        "TRACE",
-      ]),
-      path: v.string(),
-      headers: v.optional(v.record(v.string(), v.string())),
-      body: v.optional(v.record(v.string(), v.any())),
-    });
-
-    const config = v.safeParse(configSchema, unsafeConfig);
-
-    expect(config.success, JSON.stringify(config.issues, null, 2)).toBe(true);
-    if (config.success) {
-      const response = await fetch(
-        `${await getApiBaseUrl()}${config.output.path}`,
-        {
-          body: JSON.stringify(config.output.body),
-          method: config.output.method,
-          ...(config.output.headers ? { headers: config.output.headers } : {}),
-        },
-      );
-
-      scenarioData["httpResponse"] = response;
-    }
-  },
-);
-
-Then(
-  "the response status code should be {string}",
-  async ({ scenarioData }, responseStatusCode: string) => {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    expect((scenarioData["httpResponse"] as Response).status).toBe(
-      Number(responseStatusCode),
-    );
-  },
-);
-
-Then(
-  "the response body should be:",
-  async ({ scenarioData }, responseBodyString: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const responseBody = yaml.parse(responseBodyString);
-
-    expect(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      await (scenarioData["httpResponse"] as Response).json(),
-    ).toStrictEqual(responseBody);
-  },
-);
-
-Given("I select the {string} channel", async ({ page }, channel: string) => {
-  const legend = page.locator('legend:has-text("Channel")');
-  const fieldset = page.locator("fieldset").filter({ has: legend });
-  await fieldset.getByLabel(channel).check();
-  await page
-    .getByRole("button", { name: "Generate Request Object", exact: true })
-    .click();
-  await page
-    .getByRole("link", { name: "Start AMC Journey", exact: true })
-    .click();
 });
 
 Then(
@@ -279,21 +67,5 @@ Then(
     const currentUrl = new URL(page.url());
     const paramValue = currentUrl.searchParams.get(paramName);
     expect(paramValue).toBe(expectedValue);
-  },
-);
-
-Then(
-  "the journey outcome matches the object:",
-  async ({ page }, jsonObject: string) => {
-    const journeyOutcomeDetailsElement = page.locator("#journeyOutcomeDetails");
-    const journeyOutcomeDetailsJson =
-      await journeyOutcomeDetailsElement.textContent();
-    assert.ok(journeyOutcomeDetailsJson !== null);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const journeyOutcomeDetails = JSON.parse(journeyOutcomeDetailsJson);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const object = JSON.parse(jsonObject);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    expect(journeyOutcomeDetails).toMatchObject(object);
   },
 );

@@ -4,19 +4,10 @@ coverage
 .eslintcache
 .env*
 !.env*.sample
-env*.json
-!.env*.json.sample
 .aws-sam
 .idea
 
-solutions/config/schema/types.ts
-
 solutions/frontend/dist
-
-solutions/stubs/dist
-
-solutions/infra/.terraform
-solutions/infra/.terraform.lock.hcl
 
 solutions/integration-tests/test-results/
 solutions/integration-tests/playwright-report/

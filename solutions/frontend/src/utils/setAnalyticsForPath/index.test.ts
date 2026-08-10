@@ -1,6 +1,19 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setAnalyticsForPath } from "./index.js";
 import type { FastifyRequest, FastifyReply } from "fastify";
+
+// @ts-expect-error
+vi.mock(import("../paths.js"), () => ({
+  paths: {
+    pageWithAnalytics: {
+      path: "/page-with-analytics",
+      analytics: { taxonomyLevel1: "accounts", contentId: "content-123" },
+    },
+    pageWithoutAnalytics: {
+      path: "/page-without-analytics",
+    },
+  },
+}));
 
 describe("setAnalyticsForPath", () => {
   let reply: Partial<FastifyReply>;
@@ -10,19 +23,29 @@ describe("setAnalyticsForPath", () => {
   });
 
   it("should set analytics on reply when path has analytics defined", async () => {
-    const request = { url: "/set-up-passkey" };
+    const request = { url: "/page-with-analytics" };
 
     await setAnalyticsForPath(request as FastifyRequest, reply as FastifyReply);
 
     expect(reply.analytics).toStrictEqual({
       taxonomyLevel1: "accounts",
-      taxonomyLevel2: "manage",
-      taxonomyLevel3: "passkey",
+      contentId: "content-123",
+    });
+  });
+
+  it("should match path ignoring query parameters", async () => {
+    const request = { url: "/page-with-analytics?foo=bar" };
+
+    await setAnalyticsForPath(request as FastifyRequest, reply as FastifyReply);
+
+    expect(reply.analytics).toStrictEqual({
+      taxonomyLevel1: "accounts",
+      contentId: "content-123",
     });
   });
 
   it("should not set analytics on reply when path has no analytics defined", async () => {
-    const request = { url: "/testing-journey/step-1" };
+    const request = { url: "/page-without-analytics" };
 
     await setAnalyticsForPath(request as FastifyRequest, reply as FastifyReply);
 
@@ -35,28 +58,5 @@ describe("setAnalyticsForPath", () => {
     await setAnalyticsForPath(request as FastifyRequest, reply as FastifyReply);
 
     expect(reply.analytics).toBeUndefined();
-  });
-
-  it("should match path ignoring query parameters", async () => {
-    const request = { url: "/set-up-passkey?foo=bar" };
-
-    await setAnalyticsForPath(request as FastifyRequest, reply as FastifyReply);
-
-    expect(reply.analytics).toStrictEqual({
-      taxonomyLevel1: "accounts",
-      taxonomyLevel2: "manage",
-      taxonomyLevel3: "passkey",
-    });
-  });
-
-  it("should set analytics for paths defined in paths.others", async () => {
-    const request = { url: "/error" };
-
-    await setAnalyticsForPath(request as FastifyRequest, reply as FastifyReply);
-
-    expect(reply.analytics).toStrictEqual({
-      taxonomyLevel1: "accounts",
-      contentId: "a1a3dddd-9e65-40dc-9256-12ed597ec40e",
-    });
   });
 });
