@@ -49,7 +49,7 @@ Parameters:
   CertificateStackName:
     Type: String
     Description: >
-      The name of a Dev Platform certificate stack configured for use with this application's domain (https://github.com/govuk-one-login/devplatform-deploy/tree/main/certificate)
+      The name of a Dev Platform certificate stack in eu-west-2, configured for use with this application's domain (https://github.com/govuk-one-login/devplatform-deploy/tree/main/certificate)
     Default: "CHANGEME"
   CloudFrontStackName:
     Type: String
@@ -60,7 +60,7 @@ Parameters:
     Type: String
     Description: >
       The name of a stack which configures the hosted zone for your application's domain. The stack should export a HostedZoneId output.
-      There is not Dev Platform stack for this needs to be a custom stack. See https://github.com/govuk-one-login/account-components/blob/main/solutions/infra/hosted_zone.tf
+      There is no Dev Platform stack so this needs to be a custom stack. See https://github.com/govuk-one-login/account-components/blob/main/solutions/infra/hosted_zone.tf
       for how this is configured for Account Components.
     Default: "CHANGEME"
 

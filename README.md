@@ -46,23 +46,36 @@
 
 ## How to get started
 
-- Fork this repo into the `govuk-one-login` organisation
-- Consider configuring the new repo with these recommended settings:
-  - Require the following passing checks: `sonarcloud`, `dependency-review`, `local-tests-integration`, `local-tests-unit`, `lint`
-  - Require merge queue
-- Ensure your Dev Platform SAM pipeline stack is configured with the following settings:
+You will need the following infrastructure set up in your AWS accounts in order to use this project:
+
+- A stack which configures the hosted zone for your application's domain. The stack should export a `HostedZoneId` output. There is no Dev Platform stack so this needs to be a custom stack. See https://github.com/govuk-one-login/account-components/blob/main/solutions/infra/hosted_zone.tf for how this is configured for Account Components.
+- A Dev Platform test image repository stack (https://github.com/govuk-one-login/devplatform-deploy/tree/main/test-image-repository)
+- A Dev Platform build notifications stack (https://github.com/govuk-one-login/devplatform-deploy/tree/main/build-notifications)
+- Two Dev Platform certificate stacks (https://github.com/govuk-one-login/devplatform-deploy/tree/main/certificate), one in `eu-west-2` to use with API Gateway, and another in `us-east-1` to use with CloudFront
+- A Dev Platform CloudFront stack (https://github.com/govuk-one-login/devplatform-deploy/tree/main/cloudfront-distribution) using the certificate in `us-east-1`
+- A Dev Platform VPC stack (https://github.com/govuk-one-login/devplatform-deploy/tree/main/vpc) or spoke VPC stack (https://github.com/govuk-one-login/devplatform-deploy/tree/main/spoke-vpc) configured as follows:
+  - `DynatraceApiEnabled`: `Yes` (see https://github.com/govuk-one-login/observability-infrastructure/blob/6cd6a5a26493ef08b99e4c88276a1b8c3b9ec1ff/lambdalayer/README.md?plain=1#L16)
+  - `CloudFormationEndpointEnabled`: Set to `Yes` if the environment is build (required for integration tests to run inside the VPC)
+  - `CloudWatchLogsApiEnabled`: Set to `Yes` if the environment is build (required for integration tests to run inside the VPC)
+  - `CloudWatchApiEnabled`: `Yes`
+  - `DynamoDBApiEnabled`: `Yes`
+- A Dev Platform SAM deploy pipeline stack (https://github.com/govuk-one-login/devplatform-deploy/tree/main/sam-deploy-pipeline) configured as follows:
   - Allowed services: EC2 (required to attach lambdas to VPC), DynamoDB, Lambda (required for canaries), Xray
   - `ProgrammaticPermissionsBoundary`: `true`
   - `AdditionalCodeSigningVersionArns`: set the the value detailed at https://github.com/govuk-one-login/observability-infrastructure/blob/main/lambdalayer/README.md?plain=1#L13
   - `CustomKmsKeyArns`: set to the value detailed at https://github.com/govuk-one-login/observability-infrastructure/blob/main/lambdalayer/README.md?plain=1#L14
   - `RunTestContainerInVPC`: `true`
   - `TestReportFormat`: `CUCUMBERJSON`
-  - `TestImageRepositoryNames`: the name of your test image repository (see https://github.com/govuk-one-login/devplatform-deploy/tree/main/test-image-repository)
-  - `TestImageRepositoryUri`: the URI of your test image repository (see https://github.com/govuk-one-login/devplatform-deploy/tree/main/test-image-repository)
+  - `TestImageRepositoryNames`: the name of your test image repository
+  - `TestImageRepositoryUri`: the URI of your test image repository
   - `TestComputeType`: `BUILD_GENERAL1_2XLARGE` (ensures many integration tests can run in parallel)
-- Ensure your Dev Platform VPC stack is configured with the following settings:
-  - Allowed services: EC2 (required to attach lambdas to VPC), DynamoDB, Lambda (required for canaries), Xray
-  - `DynatraceApiEnabled`: `Yes` (see https://github.com/govuk-one-login/observability-infrastructure/blob/6cd6a5a26493ef08b99e4c88276a1b8c3b9ec1ff/lambdalayer/README.md?plain=1#L16)
+
+Once this infrastructure is configured then:
+
+- Fork this repo into the `govuk-one-login` organisation
+- Consider configuring the new repo with these recommended settings:
+  - Require the following passing checks: `sonarcloud`, `dependency-review`, `local-tests-integration`, `local-tests-unit`, `lint`
+  - Require merge queue
 - Find and action all instances of `CHANGEME` and `changeme`
 - Retain the contents of this README file below to following horizontal rule, and then read them for further context and setup instructions
 
