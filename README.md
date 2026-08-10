@@ -3,7 +3,7 @@
 ## What features are included? (in no particular order and not exhaustive)
 
 - Fastify-based frontend application running using ESM and strict TypeScript type checking
-- Built with Rolldown to enable code splitting tree shaking and minification to minimise cold start times
+- Built with Rolldown to enable code splitting, tree shaking and minification to minimise cold start times
 - Serving and client-side caching of static assets with cache busting query strings generated at build-time
 - CSRF protection
 - HTTP security headers via Helmet
