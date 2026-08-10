@@ -19,32 +19,34 @@ sass --load-path=../../node_modules/govuk-frontend/dist/govuk --load-path=../../
 rm dist/static/application.scss
 csso dist/static/application.css --output dist/static/application.css
 
+HASH_JSON_TEMPLATE='{"hash":"X"}'
+
 # Create a hash of the src/static folder and write it
 # into a JSON object in src/utils/static-hash.json
 if [[ ! -f src/utils/static-hash.json ]]; then
-  tar cvf - src/static | sha1sum | head -c 40 | xargs -I X echo '{"hash":"X"}' > src/utils/static-hash.json
+  tar cvf - src/static | sha256sum | head -c 40 | xargs -I X echo "$HASH_JSON_TEMPLATE" > src/utils/static-hash.json
 fi
 
 # Create a hash of the node_modules/govuk-frontend/dist/govuk/assets folder and write it
 # into a JSON object in src/utils/static-hash-govuk-frontend-assets.json
 if [[ ! -f src/utils/static-hash-govuk-frontend-assets.json ]]; then
-  tar cvf - node_modules/govuk-frontend/dist/govuk/assets | sha1sum | head -c 40 | xargs -I X echo '{"hash":"X"}' > src/utils/static-hash-govuk-frontend-assets.json
+  tar cvf - node_modules/govuk-frontend/dist/govuk/assets | sha256sum | head -c 40 | xargs -I X echo "$HASH_JSON_TEMPLATE" > src/utils/static-hash-govuk-frontend-assets.json
 fi
 
 # Create a hash of the node_modules/@govuk-one-login/frontend-analytics/lib folder and write it
 # into a JSON object in src/utils/static-hash-govuk-one-login-frontend-analytics.json
 if [[ ! -f src/utils/static-hash-govuk-one-login-frontend-analytics.json ]]; then
-  tar cvf - node_modules/@govuk-one-login/frontend-analytics/lib | sha1sum | head -c 40 | xargs -I X echo '{"hash":"X"}' > src/utils/static-hash-govuk-one-login-frontend-analytics.json
+  tar cvf - node_modules/@govuk-one-login/frontend-analytics/lib | sha256sum | head -c 40 | xargs -I X echo "$HASH_JSON_TEMPLATE" > src/utils/static-hash-govuk-one-login-frontend-analytics.json
 fi
 
 # Create a hash of the node_modules/@govuk-one-login/frontend-device-intelligence/build/esm folder and write it
 # into a JSON object in src/utils/static-hash-govuk-one-login-frontend-device-intelligence.json
 if [[ ! -f src/utils/static-hash-govuk-one-login-frontend-device-intelligence.json ]]; then
-  tar cvf - node_modules/@govuk-one-login/frontend-device-intelligence/build/esm | sha1sum | head -c 40 | xargs -I X echo '{"hash":"X"}' > src/utils/static-hash-govuk-one-login-frontend-device-intelligence.json
+  tar cvf - node_modules/@govuk-one-login/frontend-device-intelligence/build/esm | sha256sum | head -c 40 | xargs -I X echo "$HASH_JSON_TEMPLATE" > src/utils/static-hash-govuk-one-login-frontend-device-intelligence.json
 fi
 
 # Create a hash of the node_modules/govuk-frontend/dist/govuk folder and write it
 # into a JSON object in src/utils/static-hash-govuk-frontend.json
 if [[ ! -f src/utils/static-hash-govuk-frontend.json ]]; then
-  tar cvf - node_modules/govuk-frontend/dist/govuk | sha1sum | head -c 40 | xargs -I X echo '{"hash":"X"}' > src/utils/static-hash-govuk-frontend.json
+  tar cvf - node_modules/govuk-frontend/dist/govuk | sha256sum | head -c 40 | xargs -I X echo "$HASH_JSON_TEMPLATE" > src/utils/static-hash-govuk-frontend.json
 fi
