@@ -5,7 +5,7 @@ Parameters:
   Environment:
     Type: String
     Description: >
-      The environment type
+      The environment type. Provided by the deployment pipeline.
     AllowedValues:
       - "dev"
       - "build"
@@ -15,231 +15,106 @@ Parameters:
   CodeSigningConfigArn:
     Type: String
     Description: >
-      The ARN of the Code Signing Config to use, provided by the deployment pipeline
+      The ARN of the code signing config to use. Provided by the deployment pipeline.
     Default: "none"
   PermissionsBoundary:
     Type: String
     Description: >
-      The ARN of the permissions boundary to apply to any role created by the template, provided by the deployment pipeline
+      The ARN of the permissions boundary to apply to any role created by the template. Provided by the deployment pipeline.
     Default: "none"
   VpcStackName:
     Type: String
     Description: >
-      The name of the stack that defines the VPC in which resources will be located, provided by the deployment pipeline
-  ApiStageName:
-    Description: The stage name of the API
-    Type: String
-    Default: v1
-  LambdaArchitecture:
-    Type: String
-    Description: >
-      The Lambda function architecture
-    AllowedValues:
-      - "x86_64"
-      - "arm64"
-    Default: "arm64"
+      The name of the stack that defines the VPC in which resources will be located. Provided by the deployment pipeline.
   LambdaDeploymentPreference:
-    Description: Specifies the configuration to enable gradual Lambda deployments. It can be used to set deployment type and also allows skipping canary deployment by setting to 'AllAtOnce'
+    Description: >
+      The default canary deployment preference for lambdas. The default will be used if the  value is not provided by the deployment pipeline.
     Type: String
-    Default: "Canary10Percent10Minutes"
+    Default: "AllAtOnce"
     AllowedValues:
-      - AllAtOnce
+      - Canary10Percent30Minutes
       - Canary10Percent5Minutes
       - Canary10Percent10Minutes
       - Canary10Percent15Minutes
-      - Canary10Percent30Minutes
+      - Linear10PercentEvery10Minutes
+      - Linear10PercentEvery1Minute
+      - Linear10PercentEvery2Minutes
+      - Linear10PercentEvery3Minutes
+      - AllAtOnce
   AlertsStackName:
     Type: String
-    Description: The name of the alerting stack that contains SNS topics for alarms
-    Default: "build-notifications"
+    Description: >
+      The name of a Dev Platform build notifications stack that contains SNS topics for alarms (https://github.com/govuk-one-login/devplatform-deploy/tree/main/build-notifications)
+    Default: "CHANGEME"
+  CertificateStackName:
+    Type: String
+    Description: >
+      The name of a Dev Platform certificate stack configured for use with this application's domain (https://github.com/govuk-one-login/devplatform-deploy/tree/main/certificate)
+    Default: "CHANGEME"
+  CloudFrontStackName:
+    Type: String
+    Description: >
+      The name of a Dev Platform CloudFront stack configured for use with this application (https://github.com/govuk-one-login/devplatform-deploy/tree/main/cloudfront-distribution)
+    Default: "CHANGEME"
+  HostedZoneStackName:
+    Type: String
+    Description: >
+      The name of a stack which configures the hosted zone for your application's domain. The stack should export a HostedZoneId output.
+      There is not Dev Platform stack for this needs to be a custom stack. See https://github.com/govuk-one-login/account-components/blob/main/solutions/infra/hosted_zone.tf
+      for how this is configured for Account Components.
+    Default: "CHANGEME"
 
 Mappings:
   EnvironmentConfiguration:
     dev:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables # pragma: allowlist secret
-      authorizeEndpointUrl: https://manage.dev.account.gov.uk/authorize
-      issuerUrl: https://manage.dev.account.gov.uk
-      apiAllowedVpceIds: []
-      LambdaLogLevel: DEBUG
-      UseCanary: false
-      frontendUrl: https://manage.dev.account.gov.uk
-      cacheHeaderMaxAge: 5
-      frontendDomain: manage.dev.account.gov.uk
+      powertoolsLogLevel: DEBUG
+      useCanary: false
+      frontendDomain: CHANGEME # e.g manage.dev.account.gov.uk
       authFrontendUrl: https://signin.dev.account.gov.uk
       analyticsCookieDomain: dev.account.gov.uk
-      ga4ContainerId: "GTM-KD86CMZ"
+      ga4ContainerId: CHANGEME
       analyticsEnabled: "1"
-      accountManagementApiUrl: https://stubs.manage.dev.account.gov.uk/account-management-api
-      accountInterventionsServiceApiUrl: https://stubs.manage.dev.account.gov.uk/account-interventions-service-api
-      contactUrl: https://home.dev.account.gov.uk/contact-gov-uk-one-login
-      passkeysRpId: dev.account.gov.uk
-      passkeysRpName: "GOV.UK One Login (dev)"
-      passkeysExpectedOrigin: https://manage.dev.account.gov.uk
-      yourServicesUrl: https://home.dev.account.gov.uk/your-services
-      securityUrl: https://home.dev.account.gov.uk/security
-      dynatraceRumUrl: ""
-      accountDataApiUrl: https://stubs.manage.dev.account.gov.uk/account-data-api
-      notifyDontSendEmailsTo: "^(perftest.+?@digital.cabinet-office.gov.uk)|(testuser@test.null.local)$"
-      notifyTemplateIds: |
-        {
-          "CREATE_PASSKEY_WITH_DISPLAY_NAME": "fb385d74-ac28-466d-8695-3d8a732a4cf8",
-          "CREATE_PASSKEY_WITHOUT_DISPLAY_NAME": "d20ccbec-3eac-4669-993c-d3f892ecc0f6"
-        }
-      notificationsVisibilityTimeout: 120
-      notificationsMaxReceiveCount: 5
-      txmaAccountArn: ""
-      stubsDomain: stubs.manage.dev.account.gov.uk
-      rootDomain: account.gov.uk
       rootDomainWithEnv: dev.account.gov.uk
     build:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables # pragma: allowlist secret
-      authorizeEndpointUrl: https://manage.build.account.gov.uk/authorize
-      issuerUrl: https://manage.build.account.gov.uk
-      apiAllowedVpceIds: []
-      LambdaLogLevel: INFO
-      UseCanary: false
-      frontendUrl: https://manage.build.account.gov.uk
-      cacheHeaderMaxAge: 5
-      frontendDomain: manage.build.account.gov.uk
+      powertoolsLogLevel: INFO
+      useCanary: false
+      frontendDomain: CHANGEME # e.g manage.build.account.gov.uk
       authFrontendUrl: https://signin.build.account.gov.uk
       analyticsCookieDomain: build.account.gov.uk
-      ga4ContainerId: "GTM-KD86CMZ"
+      ga4ContainerId: CHANGEME
       analyticsEnabled: "1"
-      accountManagementApiUrl: https://stubs.manage.build.account.gov.uk/account-management-api
-      accountInterventionsServiceApiUrl: https://stubs.manage.build.account.gov.uk/account-interventions-service-api
-      contactUrl: https://home.build.account.gov.uk/contact-gov-uk-one-login
-      passkeysRpId: build.account.gov.uk
-      passkeysRpName: "GOV.UK One Login (build)"
-      passkeysExpectedOrigin: https://manage.build.account.gov.uk
-      yourServicesUrl: https://home.build.account.gov.uk/your-services
-      securityUrl: https://home.build.account.gov.uk/security
-      dynatraceRumUrl: ""
-      accountDataApiUrl: https://stubs.manage.build.account.gov.uk/account-data-api
-      notifyDontSendEmailsTo: "^(perftest.+?@digital.cabinet-office.gov.uk)|(testuser@test.null.local)$"
-      notifyTemplateIds: |
-        {
-          "CREATE_PASSKEY_WITH_DISPLAY_NAME": "fb385d74-ac28-466d-8695-3d8a732a4cf8",
-          "CREATE_PASSKEY_WITHOUT_DISPLAY_NAME": "d20ccbec-3eac-4669-993c-d3f892ecc0f6"
-        }
-      notificationsVisibilityTimeout: 120
-      notificationsMaxReceiveCount: 5
-      txmaAccountArn: ""
-      stubsDomain: stubs.manage.build.account.gov.uk
-      rootDomain: account.gov.uk
       rootDomainWithEnv: build.account.gov.uk
     staging:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables # pragma: allowlist secret
-      authorizeEndpointUrl: https://manage.staging.account.gov.uk/authorize
-      issuerUrl: https://manage.staging.account.gov.uk
-      apiAllowedVpceIds:
-        - "vpce-0c9ce65be09f99db7" # di-account-staging
-        - "vpce-07078f5f005fe5efc" # di-authentication-staging
-      LambdaLogLevel: INFO
-      UseCanary: true
-      frontendUrl: https://manage.staging.account.gov.uk
-      cacheHeaderMaxAge: 60
-      frontendDomain: manage.staging.account.gov.uk
+      powertoolsLogLevel: INFO
+      useCanary: true
+      frontendDomain: CHANGEME # e.g manage.staging.account.gov.uk
       authFrontendUrl: https://signin.staging.account.gov.uk
       analyticsCookieDomain: staging.account.gov.uk
-      ga4ContainerId: "GTM-KD86CMZ"
+      ga4ContainerId: CHANGEME
       analyticsEnabled: "1"
-      accountManagementApiUrl: "https://9ntf0mlypd-vpce-04ae8d53b32b38278.execute-api.eu-west-2.amazonaws.com/staging"
-      accountInterventionsServiceApiUrl: https://vjdj6kjrj2.execute-api.eu-west-2.amazonaws.com/v1
-      contactUrl: https://home.staging.account.gov.uk/contact-gov-uk-one-login
-      passkeysRpId: staging.account.gov.uk
-      passkeysRpName: "GOV.UK One Login (staging)"
-      passkeysExpectedOrigin: https://manage.staging.account.gov.uk
-      yourServicesUrl: https://home.staging.account.gov.uk/your-services
-      securityUrl: https://home.staging.account.gov.uk/security
-      dynatraceRumUrl: ""
-      accountDataApiUrl: https://7xgl7lexy4.execute-api.eu-west-2.amazonaws.com/staging
-      notifyDontSendEmailsTo: "^(perftest.+?@digital.cabinet-office.gov.uk)|(testuser@test.null.local)$"
-      notifyTemplateIds: |
-        {
-          "CREATE_PASSKEY_WITH_DISPLAY_NAME": "aa8697b6-23e6-4317-9aff-5a274142e7f2",
-          "CREATE_PASSKEY_WITHOUT_DISPLAY_NAME": "369a29fd-1e7b-4c1f-bd92-a08a51c99b2e"
-        }
-      notificationsVisibilityTimeout: 120
-      notificationsMaxReceiveCount: 5
-      txmaAccountArn: "arn:aws:iam::178023842775:root"
-      stubsDomain: ""
-      rootDomain: account.gov.uk
       rootDomainWithEnv: staging.account.gov.uk
     integration:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables # pragma: allowlist secret
-      authorizeEndpointUrl: https://manage.integration.account.gov.uk/authorize
-      issuerUrl: https://manage.integration.account.gov.uk
-      apiAllowedVpceIds:
-        - "vpce-0e594accb3d775457" # di-account-integration
-        - "vpce-0df10df14d851e1c9" # di-authentication-integration
-      LambdaLogLevel: INFO
-      UseCanary: true
-      frontendUrl: https://manage.integration.account.gov.uk
-      cacheHeaderMaxAge: 60
-      frontendDomain: manage.integration.account.gov.uk
+      powertoolsLogLevel: INFO
+      useCanary: true
+      frontendDomain: CHANGEME # e.g manage.integration.account.gov.uk
       authFrontendUrl: https://signin.integration.account.gov.uk
       analyticsCookieDomain: integration.account.gov.uk
-      ga4ContainerId: ""
+      ga4ContainerId: CHANGEME
       analyticsEnabled: "0"
-      accountManagementApiUrl: "https://0boxndhikk-vpce-0553cfc8fc1aeb970.execute-api.eu-west-2.amazonaws.com/integration"
-      accountInterventionsServiceApiUrl: https://65zhj32bjb.execute-api.eu-west-2.amazonaws.com/v1
-      contactUrl: https://home.integration.account.gov.uk/contact-gov-uk-one-login
-      passkeysRpId: integration.account.gov.uk
-      passkeysRpName: "GOV.UK One Login (integration)"
-      passkeysExpectedOrigin: https://manage.integration.account.gov.uk
-      yourServicesUrl: https://home.integration.account.gov.uk/your-services
-      securityUrl: https://home.integration.account.gov.uk/security
-      dynatraceRumUrl: ""
-      accountDataApiUrl: https://hoidt6wujb.execute-api.eu-west-2.amazonaws.com/integration
-      notifyDontSendEmailsTo: ""
-      notifyTemplateIds: |
-        {
-          "CREATE_PASSKEY_WITH_DISPLAY_NAME": "aa8697b6-23e6-4317-9aff-5a274142e7f2",
-          "CREATE_PASSKEY_WITHOUT_DISPLAY_NAME": "369a29fd-1e7b-4c1f-bd92-a08a51c99b2e"
-        }
-      notificationsVisibilityTimeout: 300
-      notificationsMaxReceiveCount: 36
-      txmaAccountArn: "arn:aws:iam::729485541398:root"
-      stubsDomain: ""
-      rootDomain: account.gov.uk
       rootDomainWithEnv: integration.account.gov.uk
     production:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceProductionVariables # pragma: allowlist secret
-      authorizeEndpointUrl: https://manage.account.gov.uk/authorize
-      issuerUrl: https://manage.account.gov.uk
-      apiAllowedVpceIds:
-        - "vpce-0d7972874707185a0" # di-account-production
-        - "vpce-0db136878c87bf2d0" # di-authentication-production
-      LambdaLogLevel: INFO
-      UseCanary: true
-      frontendUrl: https://manage.account.gov.uk
-      cacheHeaderMaxAge: 60
-      frontendDomain: manage.account.gov.uk
+      powertoolsLogLevel: INFO
+      useCanary: true
+      frontendDomain: CHANGEME # e.g manage.account.gov.uk
       authFrontendUrl: https://signin.account.gov.uk
       analyticsCookieDomain: account.gov.uk
-      ga4ContainerId: "GTM-K4PBJH3"
+      ga4ContainerId: CHANGEME
       analyticsEnabled: "1"
-      accountManagementApiUrl: "https://p303w5w1m0-vpce-0d6fa47d5c9ae876d.execute-api.eu-west-2.amazonaws.com/production"
-      accountInterventionsServiceApiUrl: https://ruz07ekh4b.execute-api.eu-west-2.amazonaws.com/v1
-      contactUrl: https://home.account.gov.uk/contact-gov-uk-one-login
-      passkeysRpId: account.gov.uk
-      passkeysRpName: "GOV.UK One Login"
-      passkeysExpectedOrigin: https://manage.account.gov.uk
-      yourServicesUrl: https://home.account.gov.uk/your-services
-      securityUrl: https://home.account.gov.uk/security
-      dynatraceRumUrl: ""
-      accountDataApiUrl: https://0218o1p9tj.execute-api.eu-west-2.amazonaws.com/production
-      notifyDontSendEmailsTo: ""
-      notifyTemplateIds: |
-        {
-          "CREATE_PASSKEY_WITH_DISPLAY_NAME": "07fc5ed8-4775-4f03-b6cf-08a273458849",
-          "CREATE_PASSKEY_WITHOUT_DISPLAY_NAME": "b6cec4ce-a23e-4132-87d8-952697c58851"
-        }
-      notificationsVisibilityTimeout: 300
-      notificationsMaxReceiveCount: 36
-      txmaAccountArn: "arn:aws:iam::451773080033:root"
-      stubsDomain: ""
-      rootDomain: account.gov.uk
       rootDomainWithEnv: account.gov.uk
 
 Conditions:
@@ -258,17 +133,11 @@ Conditions:
       - !Ref "AWS::Region"
       - "local"
   CanariesEnabled: !Equals
-    - !FindInMap [EnvironmentConfiguration, !Ref Environment, UseCanary]
+    - !FindInMap [EnvironmentConfiguration, !Ref Environment, useCanary]
     - true
   IsProduction: !Equals [!Ref Environment, "production"]
   IsDevEnvironment: !Equals [!Ref Environment, "dev"]
-  IsBuildEnvironment: !Equals [!Ref Environment, "build"]
-  IsDevOrBuild: !Or [Condition: IsDevEnvironment, Condition: IsBuildEnvironment]
   IsLocalOrDev: !Or [Condition: IsDevEnvironment, Condition: IsLocal]
-  HasTxmaAccountArn: !Not
-    - !Equals
-      - !FindInMap [EnvironmentConfiguration, !Ref Environment, txmaAccountArn]
-      - ""
 
 Globals:
   Function:
@@ -294,20 +163,16 @@ Globals:
       - !Ref PermissionsBoundary
       - !Ref AWS::NoValue
     VpcConfig:
-      SubnetIds: !If
-        - IsDevOrBuild
-        - - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdB
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdC
-        - - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdC
+      SubnetIds:
+        - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+        - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdC
       SecurityGroupIds:
         - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Timeout: 10
     MemorySize: 1769 # so that we get ~1 VCPU
     Architectures:
-      - !Ref LambdaArchitecture
+      - arm64
     Runtime: nodejs24.x
     Environment:
       Variables:
@@ -315,7 +180,7 @@ Globals:
           !FindInMap [
             EnvironmentConfiguration,
             !Ref Environment,
-            LambdaLogLevel,
+            powertoolsLogLevel,
           ]
         POWERTOOLS_SERVICE_NAME: !Ref AWS::StackName
         POWERTOOLS_PARAMETERS_MAX_AGE: 300
@@ -402,7 +267,6 @@ Resources:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      Description: AWS KMS key for encrypting the data stored within DynamoDB tables
       EnableKeyRotation: true
       KeyPolicy:
         Version: "2012-10-17"
@@ -425,21 +289,8 @@ Resources:
               - "kms:CreateGrant"
             Resource: "*"
             Condition:
-              ArnEquals:
+              ArnLike:
                 aws:SourceArn: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*"
-          - Effect: Allow
-            Principal:
-              Service: "lambda.amazonaws.com"
-            Action:
-              - "kms:Decrypt"
-              - "kms:GenerateDataKey"
-            Resource: "*"
-            Condition:
-              ArnEquals:
-                aws:SourceArn: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:*"
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-DynamoDbSSEKey"
 
   DynamoDbSSEKeyAlias:
     Type: AWS::KMS::Alias
@@ -452,7 +303,6 @@ Resources:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      Description: AWS KMS key for encrypting CloudWatch logs
       EnableKeyRotation: true
       KeyPolicy:
         Version: "2012-10-17"
@@ -475,9 +325,6 @@ Resources:
             Condition:
               ArnLike:
                 "kms:EncryptionContext:aws:logs:arn": !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-CloudWatchEncryptionKey"
 
   CloudWatchEncryptionKeyAlias:
     Type: AWS::KMS::Alias
@@ -490,7 +337,6 @@ Resources:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      Description: "KMS key used to encrypt lambda environment variables"
       EnableKeyRotation: true
       KeyPolicy:
         Version: "2012-10-17"
@@ -510,369 +356,12 @@ Resources:
             Condition:
               ArnLike:
                 "aws:SourceArn": !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:*"
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-LambdaEnvironmentVariableEncryptionKey"
 
   LambdaEnvironmentVariableEncryptionKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
       AliasName: !Sub "alias/${AWS::StackName}-LambdaEnvironmentVariableEncryptionKey"
       TargetKeyId: !GetAtt LambdaEnvironmentVariableEncryptionKey.Arn
-
-  JARRSAEncryptionKey:
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Type: AWS::KMS::Key
-    Properties:
-      Description: "RSA KMS key pair used to encrypt and decrypt JARs"
-      KeySpec: RSA_2048
-      KeyUsage: ENCRYPT_DECRYPT
-      Origin: AWS_KMS
-      Enabled: true
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action:
-              - kms:*
-            Resource: "*"
-          - Effect: "Allow"
-            Principal:
-              Service: lambda.amazonaws.com
-            Action:
-              - "kms:Decrypt"
-            Resource: "*"
-            Condition:
-              ArnLike:
-                "aws:SourceArn":
-                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-AuthorizeLambda*"
-          - Effect: "Allow"
-            Principal:
-              Service: lambda.amazonaws.com
-            Action:
-              - "kms:ListAliases"
-              - "kms:GetPublicKey"
-            Resource: "*"
-            Condition:
-              ArnLike:
-                "aws:SourceArn":
-                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-StubsLambda*"
-                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}*"
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-JARRSAEncryptionKey"
-
-  JARRSAEncryptionKeyAlias:
-    Type: AWS::KMS::Alias
-    Properties:
-      AliasName: !Sub "alias/${AWS::StackName}-JARRSAEncryptionKey"
-      TargetKeyId: !GetAtt JARRSAEncryptionKey.Arn
-
-  JWTSigningKey:
-    Type: AWS::KMS::Key
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      Description: "JWT Signing Key"
-      KeySpec: ECC_NIST_P256
-      KeyUsage: SIGN_VERIFY
-      Origin: AWS_KMS
-      Enabled: true
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action:
-              - kms:*
-            Resource: "*"
-          - Effect: "Allow"
-            Principal:
-              Service: lambda.amazonaws.com
-            Action:
-              - "kms:Sign"
-              - "kms:Verify"
-              - "kms:DescribeKey"
-            Resource: "*"
-            Condition:
-              ArnLike:
-                "aws:SourceArn":
-                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-*"
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-JWTSigningKey"
-
-  JWTSigningKeyAlias:
-    Type: AWS::KMS::Alias
-    Properties:
-      AliasName: !Sub "alias/${AWS::StackName}-JWTSigningKey"
-      TargetKeyId: !GetAtt JWTSigningKey.Arn
-
-  S3SSEKey:
-    Type: AWS::KMS::Key
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      EnableKeyRotation: true
-      KeyUsage: ENCRYPT_DECRYPT
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action:
-              - kms:*
-            Resource: "*"
-          - Effect: Allow
-            Principal:
-              Service: s3.amazonaws.com
-            Action:
-              - kms:Encrypt
-              - kms:Decrypt
-              - kms:ReEncrypt*
-              - kms:GenerateDataKey*
-              - kms:DescribeKey
-            Resource: "*"
-            Condition:
-              StringEquals:
-                kms:ViaService: !Sub "s3.${AWS::Region}.amazonaws.com"
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action:
-              - kms:GenerateDataKey
-            Resource: "*"
-            Condition:
-              ArnLike:
-                "aws:SourceArn": !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-JwksGeneratorLambda*"
-
-  S3SSEKeyAlias:
-    Type: AWS::KMS::Alias
-    Properties:
-      AliasName: !Sub "alias/${AWS::StackName}-S3SSEKey"
-      TargetKeyId: !GetAtt S3SSEKey.Arn
-
-  JWKSStoreBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      VersioningConfiguration:
-        Status: Enabled
-      LoggingConfiguration:
-        DestinationBucketName: !Sub "di-s3-access-logs-${AWS::AccountId}-${AWS::Region}"
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: aws:kms
-              KMSMasterKeyID: !Ref S3SSEKey
-
-  JWKSStoreBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref JWKSStoreBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Deny
-            Principal: "*"
-            Action: s3:*
-            Resource:
-              - !Sub "arn:aws:s3:::${JWKSStoreBucket}"
-              - !Sub "arn:aws:s3:::${JWKSStoreBucket}/*"
-            Condition:
-              Bool:
-                aws:SecureTransport: false
-              NumericLessThan:
-                s3:TlsVersion: "1.2"
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Resource: !Sub "arn:aws:s3:::${JWKSStoreBucket}/*"
-            Action:
-              - s3:PutObject
-          - Effect: Allow
-            Resource: !Sub "arn:aws:s3:::${JWKSStoreBucket}/*"
-            Principal:
-              Service: apigateway.amazonaws.com
-            Action:
-              - s3:GetObject
-
-  JwksGeneratorLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      Description: "Creates a JWKS doc and stores it into a S3 Bucket"
-      Timeout: 15
-      MemorySize: 128
-      Handler: jwks-creator.handler
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdC
-      DeploymentPreference:
-        Enabled: false
-      LoggingConfig:
-        LogGroup: !Ref JwksGeneratorLambdaLogGroup
-      Environment:
-        Variables:
-          BUCKET_NAME: !Ref JWKSStoreBucket
-          JAR_RSA_ENCRYPTION_KEY_ALIAS: !Ref JARRSAEncryptionKeyAlias
-          JWT_SIGNING_KEY_ALIAS: !Ref JWTSigningKeyAlias
-      Policies:
-        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-        - Statement:
-            - Effect: Allow
-              Action:
-                - kms:GetPublicKey
-                - kms:DescribeKey
-              Resource:
-                - !GetAtt JARRSAEncryptionKey.Arn
-                - !GetAtt JWTSigningKey.Arn
-            - Effect: Allow
-              Action:
-                - kms:GenerateDataKey
-              Resource: !GetAtt S3SSEKey.Arn
-            - Effect: Allow
-              Action:
-                - s3:PutObject
-              Resource: !Sub "${JWKSStoreBucket.Arn}/*"
-            - Effect: Allow
-              Action:
-                - logs:CreateLogGroup
-                - logs:CreateLogStream
-                - logs:PutLogEvents
-              Resource: !GetAtt JwksGeneratorLambdaLogGroup.Arn
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Minify: true
-        Format: esm
-        OutExtension:
-          - .js=.mjs
-        Target: es2024
-        Sourcemap: true
-        EntryPoints:
-          - solutions/core/src/lambda/jwks-creator.ts
-        Banner:
-          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url); # Required in order to use AWS Lambda Powertools
-
-  JwksGeneratorLambdaLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/JwksGeneratorLambda"
-      RetentionInDays: 30
-      KmsKeyId: !GetAtt CloudWatchEncryptionKey.Arn
-
-  JwksGeneratorLambdaPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !Ref JwksGeneratorLambda
-      Action: lambda:InvokeFunction
-      Principal: cloudformation.amazonaws.com
-
-  JwksGeneratorTrigger:
-    Type: AWS::CloudFormation::CustomResource
-    Properties:
-      ServiceToken: !GetAtt JwksGeneratorLambda.Arn
-      ForceUpdate: !Ref JwksGeneratorLambda.Version
-
-  AuthCodeTable:
-    Type: AWS::DynamoDB::Table
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      TableName: !Sub ${AWS::StackName}-AuthCode
-      AttributeDefinitions:
-        - AttributeName: "code"
-          AttributeType: "S"
-      KeySchema:
-        - AttributeName: "code"
-          KeyType: "HASH"
-      BillingMode: PAY_PER_REQUEST
-      ContributorInsightsSpecification:
-        Enabled: true
-      PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: false
-      TimeToLiveSpecification:
-        AttributeName: "expires"
-        Enabled: true
-      SSESpecification:
-        KMSMasterKeyId: !GetAtt DynamoDbSSEKey.Arn
-        SSEEnabled: true
-        SSEType: KMS
-      TableClass: STANDARD
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-auth_code"
-
-  JourneyOutcomeTable:
-    Type: AWS::DynamoDB::Table
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      TableName: !Sub ${AWS::StackName}-JourneyOutcome
-      AttributeDefinitions:
-        - AttributeName: outcome_id
-          AttributeType: S
-      KeySchema:
-        - AttributeName: outcome_id
-          KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
-      ContributorInsightsSpecification:
-        Enabled: true
-      PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: false
-      TimeToLiveSpecification:
-        AttributeName: "expires"
-        Enabled: true
-      SSESpecification:
-        KMSMasterKeyId: !GetAtt DynamoDbSSEKey.Arn
-        SSEEnabled: true
-        SSEType: KMS
-      TableClass: STANDARD
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-journey_outcome"
-
-  ReplayAttackTable:
-    Type: AWS::DynamoDB::Table
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      TableName: !Sub ${AWS::StackName}-ReplayAttack
-      AttributeDefinitions:
-        - AttributeName: nonce
-          AttributeType: S
-      KeySchema:
-        - AttributeName: nonce
-          KeyType: HASH
-      TimeToLiveSpecification:
-        AttributeName: expires
-        Enabled: true
-      BillingMode: PAY_PER_REQUEST
-      ContributorInsightsSpecification:
-        Enabled: true
-      PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: false
-      SSESpecification:
-        KMSMasterKeyId: !GetAtt DynamoDbSSEKey.Arn
-        SSEEnabled: true
-        SSEType: KMS
-      TableClass: STANDARD
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-replay_attack"
 
   SecretsKmsKey:
     Type: AWS::KMS::Key
@@ -894,446 +383,6 @@ Resources:
       AliasName: !Sub "alias/${AWS::StackName}-SecretsKmsKey"
       TargetKeyId: !GetAtt SecretsKmsKey.Arn
 
-  NotifyAPIKeySecret:
-    Type: AWS::SecretsManager::Secret
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      KmsKeyId: !Ref SecretsKmsKey
-      SecretString: set-me # pragma: allowlist secret
-
-  SqsKmsKey:
-    Type: AWS::KMS::Key
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      EnableKeyRotation: true
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-            Action: kms:*
-            Resource:
-              - "*"
-
-  SqsKmsKeyAlias:
-    Type: AWS::KMS::Alias
-    Properties:
-      AliasName: !Sub "alias/${AWS::StackName}-SqsKmsKey"
-      TargetKeyId: !Ref SqsKmsKey
-
-  NotificationsQueue:
-    Type: AWS::SQS::Queue
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      MessageRetentionPeriod: 1209600
-      VisibilityTimeout:
-        !FindInMap [
-          EnvironmentConfiguration,
-          !Ref Environment,
-          notificationsVisibilityTimeout,
-        ]
-      KmsMasterKeyId: !GetAtt SqsKmsKey.Arn
-      RedriveAllowPolicy:
-        redrivePermission: denyAll
-      RedrivePolicy:
-        deadLetterTargetArn: !GetAtt NotificationsDLQ.Arn
-        maxReceiveCount:
-          !FindInMap [
-            EnvironmentConfiguration,
-            !Ref Environment,
-            notificationsMaxReceiveCount,
-          ]
-
-  NotificationsDLQ:
-    Type: AWS::SQS::Queue
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      KmsMasterKeyId: !GetAtt SqsKmsKey.Arn
-      MessageRetentionPeriod: 1209600
-
-  NotificationsServiceLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      Timeout: 15
-      MemorySize: 128
-      LoggingConfig:
-        LogGroup: !Ref NotificationsServiceLambdaLogGroup
-      Events:
-        NotificationsQueue:
-          Type: SQS
-          Properties:
-            Queue: !GetAtt NotificationsQueue.Arn
-            BatchSize: 10
-            FunctionResponseTypes:
-              - ReportBatchItemFailures
-      Handler: notifications-service.handler
-      Runtime: nodejs22.x # as at 2026-02-03 the notifications-node-client library does not work with Node 24 or newer
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdB
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdC
-      Environment:
-        Variables:
-          NOTIFY_API_KEY_SECRET_ARN: !Ref NotifyAPIKeySecret
-          NOTIFY_TEMPLATE_IDS:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              notifyTemplateIds,
-            ]
-          NOTIFY_DONT_SEND_EMAILS_TO:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              notifyDontSendEmailsTo,
-            ]
-      DeploymentPreference:
-        Alarms:
-          - !Ref NotificationsServiceFunctionSuccessRate
-      Policies:
-        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-        - Statement:
-            - Effect: Allow
-              Action:
-                - sqs:ReceiveMessage
-                - sqs:DeleteMessage
-                - sqs:GetQueueAttributes
-              Resource: !GetAtt NotificationsQueue.Arn
-            - Effect: Allow
-              Action:
-                - kms:Decrypt
-              Resource: !GetAtt SqsKmsKey.Arn
-            - Effect: Allow
-              Action:
-                - "kms:Decrypt"
-              Resource:
-                - !GetAtt SecretsKmsKey.Arn
-            - Effect: Allow
-              Action: secretsmanager:GetSecretValue # pragma: allowlist secret
-              Resource: !Ref NotifyAPIKeySecret
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Minify: true
-        Format: esm
-        OutExtension:
-          - .js=.mjs
-        Target: es2022 # as at 2026-02-03 the notifications-node-client library does not work with Node 24 or newer
-        Sourcemap: true
-        EntryPoints:
-          - solutions/core/src/lambda/notifications-service.ts
-        Banner:
-          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url); # Required in order to use AWS Lambda Powertools
-
-  NotificationsServiceLambdaLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}/NotificationsService"
-      RetentionInDays: 30
-      KmsKeyId: !GetAtt CloudWatchEncryptionKey.Arn
-
-  NotificationsServiceLambdaThrottlesAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: !Sub "${AWS::StackName}/NotificationsServiceLambda"
-      MetricName: Throttles
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref NotificationsServiceLambda
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 5
-      DatapointsToAlarm: 5
-      Threshold: 0
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  NotificationsServiceLambdaLogErrorMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref NotificationsServiceLambdaLogGroup
-      FilterPattern: '{ $.level = "ERROR" || $.level = "CRITICAL" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/NotificationsServiceLambda"
-          MetricName: ErrorAndCriticalLogCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  NotificationsServiceLambdaLogErrorAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: !Sub "${AWS::StackName}/NotificationsServiceLambda"
-      MetricName: ErrorAndCriticalLogCount
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      Threshold: 3
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  NotificationsServiceLambdaLogWarnByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref NotificationsServiceLambdaLogGroup
-      FilterPattern: '{ $.level = "WARN" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/NotificationsServiceLambda"
-          MetricName: WarnLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: notificationType
-              Value: $.notificationType
-
-  NotificationsServiceLambdaLogErrorByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref NotificationsServiceLambdaLogGroup
-      FilterPattern: '{ $.level = "ERROR" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/NotificationsServiceLambda"
-          MetricName: ErrorLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: notificationType
-              Value: $.notificationType
-
-  NotificationsServiceLambdaLogCriticalByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref NotificationsServiceLambdaLogGroup
-      FilterPattern: '{ $.level = "CRITICAL" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/NotificationsServiceLambda"
-          MetricName: CriticalLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: notificationType
-              Value: $.notificationType
-
-  NotificationsServiceFunctionSuccessRate:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Metrics:
-        - Id: errors
-          MetricStat:
-            Metric:
-              Namespace: !Sub "${AWS::StackName}/NotificationsServiceLambda"
-              MetricName: Errors
-              Dimensions:
-                - Name: FunctionName
-                  Value: !Ref NotificationsServiceLambda
-            Period: 300
-            Stat: Sum
-          ReturnData: false
-        - Id: invocations
-          MetricStat:
-            Metric:
-              Namespace: !Sub "${AWS::StackName}/NotificationsServiceLambda"
-              MetricName: Invocations
-              Dimensions:
-                - Name: FunctionName
-                  Value: !Ref NotificationsServiceLambda
-            Period: 300
-            Stat: Sum
-          ReturnData: false
-        - Id: successRate
-          Expression: "1 - (errors / invocations)"
-          Label: "Success Rate"
-          ReturnData: true
-      Threshold: 0.95
-      ComparisonOperator: LessThanThreshold
-      EvaluationPeriods: 1
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  NotificationsQueueProcessingTooSlow:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-      ComparisonOperator: GreaterThanThreshold
-      Threshold: 600
-      EvaluationPeriods: 1
-      TreatMissingData: notBreaching
-      Dimensions:
-        - Name: QueueName
-          Value: !GetAtt NotificationsQueue.QueueName
-      MetricName: ApproximateAgeOfOldestMessage
-      Namespace: AWS/SQS
-      Period: 60
-      Statistic: Maximum
-
-  NotificationsDLQHasMessages:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-      ComparisonOperator: GreaterThanThreshold
-      Threshold: 0
-      EvaluationPeriods: 1
-      TreatMissingData: notBreaching
-      Dimensions:
-        - Name: QueueName
-          Value: !GetAtt NotificationsDLQ.QueueName
-      MetricName: ApproximateNumberOfMessagesVisible
-      Namespace: AWS/SQS
-      Period: 60
-      Statistic: Maximum
-
-  TxMASQSProducerAuditEventQueue:
-    Type: AWS::SQS::Queue
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      MessageRetentionPeriod: !If [IsDevOrBuild, 3600, 1209600]
-      KmsMasterKeyId: !Ref TxMASQSProducerAuditEventQueueEncryptionKeyAlias
-      RedriveAllowPolicy:
-        redrivePermission: denyAll
-      RedrivePolicy:
-        deadLetterTargetArn: !GetAtt TxMAAuditEventDeadLetterQueue.Arn
-        maxReceiveCount: 10
-      Tags:
-        - Key: "AuthoredBy"
-          Value: "TxMA"
-        - Key: "ProducerType"
-          Value: "SQS"
-        - Key: "QueueType"
-          Value: "Main"
-
-  TxMASQSProducerAuditEventQueuePolicy:
-    Type: AWS::SQS::QueuePolicy
-    Properties:
-      Queues:
-        - !Ref TxMASQSProducerAuditEventQueue
-      PolicyDocument:
-        Statement:
-          - Sid: "AllowReadByTxMAAccount"
-            Effect: Allow
-            Principal:
-              AWS: !If
-                - HasTxmaAccountArn
-                - !FindInMap [
-                    EnvironmentConfiguration,
-                    !Ref Environment,
-                    txmaAccountArn,
-                  ]
-                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action:
-              - "sqs:ChangeMessageVisibility"
-              - "sqs:ReceiveMessage"
-              - "sqs:DeleteMessage"
-              - "sqs:GetQueueAttributes"
-            Resource: !GetAtt TxMASQSProducerAuditEventQueue.Arn
-
-  TxMAAuditEventDeadLetterQueue:
-    Type: AWS::SQS::Queue
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      MessageRetentionPeriod: 1209600
-      KmsMasterKeyId: !Ref TxMASQSProducerAuditEventQueueEncryptionKeyAlias
-      Tags:
-        - Key: "AuthoredBy"
-          Value: "TxMA"
-        - Key: "ProducerType"
-          Value: "SQS"
-        - Key: "QueueType"
-          Value: "DLQ"
-
-  TxMASQSProducerAuditEventQueueEncryptionKey:
-    Type: AWS::KMS::Key
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      Description: Symmetric key used to encrypt TxMA audit messages at rest in SQS
-      EnableKeyRotation: true
-      KeySpec: SYMMETRIC_DEFAULT
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: "Enable root account access"
-            Effect: Allow
-            Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action:
-              - "kms:*"
-            Resource: "*"
-          - Sid: "Allow decryption of events by TxMA"
-            Effect: Allow
-            Principal:
-              AWS: !If
-                - HasTxmaAccountArn
-                - !FindInMap [
-                    EnvironmentConfiguration,
-                    !Ref Environment,
-                    txmaAccountArn,
-                  ]
-                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action:
-              - "kms:decrypt"
-            Resource: "*"
-      Tags:
-        - Key: "AuthoredBy"
-          Value: "TxMA"
-        - Key: "ProducerType"
-          Value: "SQS"
-
-  TxMASQSProducerAuditEventQueueEncryptionKeyAlias:
-    Type: AWS::KMS::Alias
-    Properties:
-      AliasName: !Sub alias/${AWS::StackName}/AuditEventEncryptionKey
-      TargetKeyId: !Ref TxMASQSProducerAuditEventQueueEncryptionKey
-
-  TxMASQSProducerAuditEventQueueProcessingTooSlow:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-      ComparisonOperator: GreaterThanThreshold
-      Threshold: 86400
-      EvaluationPeriods: 1
-      TreatMissingData: notBreaching
-      Dimensions:
-        - Name: QueueName
-          Value: !GetAtt TxMASQSProducerAuditEventQueue.QueueName
-      MetricName: ApproximateAgeOfOldestMessage
-      Namespace: AWS/SQS
-      Period: 300
-      Statistic: Maximum
-
-  TxMAAuditEventDeadLetterQueueHasMessages:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-      ComparisonOperator: GreaterThanThreshold
-      Threshold: 0
-      EvaluationPeriods: 1
-      TreatMissingData: notBreaching
-      Dimensions:
-        - Name: QueueName
-          Value: !GetAtt TxMAAuditEventDeadLetterQueue.QueueName
-      MetricName: ApproximateNumberOfMessagesVisible
-      Namespace: AWS/SQS
-      Period: 300
-      Statistic: Maximum
-
   LambdaClaimedAccountConcurrencyAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -1347,1042 +396,7 @@ Resources:
       ComparisonOperator: GreaterThanThreshold
       TreatMissingData: notBreaching
       AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-CriticalAlertsTopicArn
-
-  ApiApiGatewayS3Role:
-    Type: AWS::IAM::Role
-    Properties:
-      PermissionsBoundary: !If
-        - UsePermissionsBoundary
-        - !Ref PermissionsBoundary
-        - !Ref AWS::NoValue
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: apigateway.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: S3Access
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action: s3:GetObject
-                Resource: !Sub
-                  - "arn:aws:s3:::${BucketName}/jwks.json"
-                  - BucketName: !Ref JWKSStoreBucket
-              - Effect: Allow
-                Action: kms:Decrypt
-                Resource: !GetAtt S3SSEKey.Arn
-
-  ApiApiGateway:
-    Type: AWS::Serverless::Api
-    Properties:
-      Description: Account Components API
-      StageName: !Ref ApiStageName
-      AlwaysDeploy: true
-      DisableExecuteApiEndpoint: false
-      TracingEnabled: true
-      EndpointConfiguration:
-        Type: PRIVATE
-        VpcEndpointIds:
-          - Fn::ImportValue: !Sub "${VpcStackName}-ExecuteApiGatewayEndpointId"
-      AccessLogSetting:
-        Format: >-
-          {
-          "requestId": "$context.requestId",
-          "requestTime": "$context.requestTime",
-          "requestTimeEpoch": "$context.requestTimeEpoch",
-          "httpMethod": "$context.httpMethod",
-          "domainName": "$context.domainName",
-          "path": "$context.path",
-          "routeKey": "$context.routeKey",
-          "protocol": "$context.protocol",
-          "status": "$context.status",
-          "responseLength": "$context.responseLength",
-          "responseLatency": "$context.responseLatency",
-          "authorizerLatency": "$context.authorizer.latency",
-          "integrationStatus": "$context.integrationStatus",
-          "integrationLatency": "$context.integrationLatency",
-          "integrationErrorMessage": "$context.integrationErrorMessage",
-          "errorMessage": "$context.error.message",
-          "errorResponseType": "$context.error.responseType",
-          "validationErrorString": "$context.error.validationErrorString",
-          "xrayTraceId": "$context.xrayTraceId",
-          "tlsVersion": "$context.tlsVersion",
-          "cipherSuite": "$context.cipherSuite"
-          }
-        DestinationArn: !GetAtt ApiApiGatewayAccessLogGroup.Arn
-      MethodSettings:
-        - MetricsEnabled: true
-          CacheDataEncrypted: true
-          ResourcePath: /*
-          HttpMethod: "*"
-      Policy:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal: "*"
-            Action: execute-api:Invoke
-            Resource: "*"
-            Condition:
-              StringEquals:
-                aws:sourceVpce: !If
-                  - IsDevOrBuild
-                  - - Fn::ImportValue: !Sub "${VpcStackName}-ExecuteApiGatewayEndpointId"
-                  - !FindInMap
-                    - EnvironmentConfiguration
-                    - !Ref Environment
-                    - apiAllowedVpceIds
-      Variables:
-        ApiDomain: !Sub "https://${ApiApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiStageName}"
-        AuthorizeEndpointUrl:
-          !FindInMap [
-            EnvironmentConfiguration,
-            !Ref Environment,
-            authorizeEndpointUrl,
-          ]
-        IssuerUrl:
-          !FindInMap [EnvironmentConfiguration, !Ref Environment, issuerUrl]
-      DefinitionBody:
-        openapi: 3.0.3
-        info:
-          title: Account Components API
-          version: 1.0.0
-        paths:
-          /healthcheck:
-            get:
-              x-amazon-apigateway-integration:
-                type: aws_proxy
-                httpMethod: POST
-                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiHealthcheckLambda.Alias}/invocations"
-          /token:
-            post:
-              x-amazon-apigateway-integration:
-                type: aws_proxy
-                httpMethod: POST
-                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiTokenLambda.Alias}/invocations"
-          /journeyoutcome:
-            get:
-              x-amazon-apigateway-integration:
-                type: aws_proxy
-                httpMethod: POST
-                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiJourneyOutcomeLambda.Alias}/invocations"
-          /.well-known/jwks.json:
-            get:
-              responses:
-                "200":
-                  description: JWKS response
-                  headers:
-                    Content-Type:
-                      schema:
-                        type: string
-                        example: "application/json"
-                    Cache-Control:
-                      schema:
-                        type: string
-                        example: "max-age=60"
-              x-amazon-apigateway-integration:
-                type: aws
-                httpMethod: GET
-                uri: !Sub
-                  - "arn:aws:apigateway:${AWS::Region}:s3:path/${BucketName}/jwks.json"
-                  - BucketName: !Ref JWKSStoreBucket
-                credentials: !GetAtt ApiApiGatewayS3Role.Arn
-                responses:
-                  default:
-                    statusCode: 200
-                    responseParameters:
-                      method.response.header.Content-Type: "'application/json'"
-                      method.response.header.Cache-Control: !Sub
-                        - "'max-age=${headerMaxAge}'"
-                        - headerMaxAge:
-                            !FindInMap [
-                              EnvironmentConfiguration,
-                              !Ref Environment,
-                              cacheHeaderMaxAge,
-                            ]
-          /.well-known/oauth-authorization-server:
-            get:
-              responses:
-                "200":
-                  description: OAuth Discovery
-                  headers:
-                    Content-Type:
-                      schema:
-                        type: string
-                        example: "application/json"
-                    Cache-Control:
-                      schema:
-                        type: string
-                        example: "max-age=60"
-              x-amazon-apigateway-integration:
-                responses:
-                  default:
-                    statusCode: 200
-                    responseParameters:
-                      method.response.header.Content-Type: "'application/json'"
-                      method.response.header.Cache-Control: !Sub
-                        - "'max-age=${headerMaxAge}'"
-                        - headerMaxAge:
-                            !FindInMap [
-                              EnvironmentConfiguration,
-                              !Ref Environment,
-                              cacheHeaderMaxAge,
-                            ]
-                    responseTemplates:
-                      application/json: !Sub >-
-                        {
-                            "issuer": "$stageVariables.IssuerUrl",
-                            "authorization_endpoint": "$stageVariables.AuthorizeEndpointUrl",
-                            "token_endpoint": "$stageVariables.ApiDomain/token",
-                            "jwks_uri": "$stageVariables.ApiDomain/.well-known/jwks.json",
-                            "response_types_supported": ["code"],
-                            "token_endpoint_auth_methods_supported": ["private_key_jwt"],
-                            "token_endpoint_auth_signing_alg_values_supported": ["ES256"],
-                            "scopes_supported": ["testing-journey", "account-delete", "passkey-create"],
-                            "grant_types_supported": ["authorization_code"]
-                        }
-                passthroughBehavior: when_no_match
-                requestTemplates:
-                  application/json: '{"statusCode": 200}'
-                type: mock
-
-  ApiApiGatewayUrlParameter: # for use by Integration Tests only
-    Type: AWS::SSM::Parameter
-    Condition: IsDevOrBuild
-    Properties:
-      Name: !Sub "/tests/PrivateApiGatewayUrl"
-      Type: String
-      Value: !Sub "https://${ApiApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiStageName}"
-      Description: URL of the AMC Private API
-
-  ApiApiGatewayAccessLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/apigateway/${ApiApiGateway}/${ApiStageName}"
-      RetentionInDays: 30
-      KmsKeyId: !GetAtt CloudWatchEncryptionKey.Arn
-
-  ApiHealthcheckLambdaLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}/ApiHealthcheckLambda"
-      RetentionInDays: 30
-      KmsKeyId: !GetAtt CloudWatchEncryptionKey.Arn
-
-  ApiHealthcheckLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      DeploymentPreference:
-        Alarms:
-          - !Ref ApiHealthcheckLambdaErrorsAlarm
-          - !Ref ApiHealthcheckLambdaThrottlesAlarm
-          - !Ref ApiHealthcheckLambdaAvailabilityAlarm
-          - !Ref ApiHealthcheckLambdaLogErrorAlarm
-      LoggingConfig:
-        LogGroup: !Ref ApiHealthcheckLambdaLogGroup
-      Handler: healthcheck.handler
-      Policies:
-        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-      # These events are only necessary for running locally using the SAM CLI.
-      # When CloudFormation executes this template these events are ignored
-      # and the DefinitionBody on the API Gateways takes precedence.
-      Events:
-        Healthcheck:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ApiApiGateway
-            Path: /healthcheck
-            Method: GET
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Minify: true
-        Format: "esm"
-        OutExtension:
-          - .js=.mjs
-        Target: "es2024"
-        Sourcemap: true
-        EntryPoints:
-          - solutions/api/src/lambda/healthcheck.ts
-
-  ApiTokenLambdaLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}/ApiTokenLambda"
-      RetentionInDays: 30
-      KmsKeyId: !GetAtt CloudWatchEncryptionKey.Arn
-
-  ApiTokenLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdB
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdC
-      DeploymentPreference:
-        Alarms:
-          - !Ref ApiTokenLambdaErrorsAlarm
-          - !Ref ApiTokenLambdaThrottlesAlarm
-          - !Ref ApiTokenLambdaAvailabilityAlarm
-          - !Ref ApiTokenLambdaLogErrorAlarm
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 1
-      LoggingConfig:
-        LogGroup: !Ref ApiTokenLambdaLogGroup
-      Handler: index.handler
-      Environment:
-        Variables:
-          AUTH_TABLE_NAME: !Ref AuthCodeTable
-          REPLAY_ATTACK_TABLE_NAME: !Ref ReplayAttackTable
-          JWT_SIGNING_KEY_ALIAS: !Ref JWTSigningKeyAlias
-      Policies:
-        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-        - Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:PutItem
-              Resource: !GetAtt ReplayAttackTable.Arn
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:DeleteItem
-              Resource: !GetAtt AuthCodeTable.Arn
-            - Effect: Allow
-              Action:
-                - kms:Decrypt
-              Resource: !GetAtt DynamoDbSSEKey.Arn
-            - Effect: Allow
-              Action:
-                - kms:DescribeKey
-                - kms:Sign
-              Resource: !GetAtt JWTSigningKey.Arn
-            - Effect: Allow
-              Action:
-                - appconfig:GetLatestConfiguration
-                - appconfig:StartConfigurationSession
-              Resource: !Sub arn:aws:appconfig:${AWS::Region}:${AWS::AccountId}:application/*
-      # These events are only necessary for running locally using the SAM CLI.
-      # When CloudFormation executes this template these events are ignored
-      # and the DefinitionBody on the API Gateways takes precedence.
-      Events:
-        Token:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ApiApiGateway
-            Path: /token
-            Method: POST
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Minify: true
-        Format: "esm"
-        OutExtension:
-          - .js=.mjs
-        Target: "es2024"
-        Sourcemap: true
-        Banner:
-          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url); # Required in order to use AWS Lambda Powertools
-        EntryPoints:
-          - solutions/api/src/lambda/token/index.ts
-
-  ApiJourneyOutcomeLambdaLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}/ApiJourneyOutcomeLambda"
-      RetentionInDays: 30
-      KmsKeyId: !GetAtt CloudWatchEncryptionKey.Arn
-
-  ApiJourneyOutcomeLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      DeploymentPreference:
-        Alarms:
-          - !Ref ApiJourneyOutcomeLambdaErrorsAlarm
-          - !Ref ApiJourneyOutcomeLambdaThrottlesAlarm
-          - !Ref ApiJourneyOutcomeLambdaAvailabilityAlarm
-          - !Ref ApiJourneyOutcomeLambdaLogErrorAlarm
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 1
-      LoggingConfig:
-        LogGroup: !Ref ApiJourneyOutcomeLambdaLogGroup
-      Handler: index.handler
-      Environment:
-        Variables:
-          JWT_SIGNING_KEY_ALIAS: !Ref JWTSigningKeyAlias
-          JOURNEY_OUTCOME_TABLE_NAME: !Ref JourneyOutcomeTable
-      Policies:
-        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-        - Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-              Resource:
-                - !GetAtt JourneyOutcomeTable.Arn
-            - Effect: Allow
-              Action:
-                - kms:Decrypt
-              Resource: !GetAtt DynamoDbSSEKey.Arn
-            - Effect: Allow
-              Action:
-                - kms:DescribeKey
-                - kms:GetPublicKey
-              Resource: !GetAtt JWTSigningKey.Arn
-      # These events are only necessary for running locally using the SAM CLI.
-      # When CloudFormation executes this template these events are ignored
-      # and the DefinitionBody on the API Gateways takes precedence.
-      Events:
-        JourneyOutcome:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ApiApiGateway
-            Path: /journeyoutcome
-            Method: GET
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Minify: true
-        Format: "esm"
-        OutExtension:
-          - .js=.mjs
-        Target: "es2024"
-        Sourcemap: true
-        EntryPoints:
-          - solutions/api/src/lambda/journeyoutcome/index.ts
-        Banner:
-          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url); # Required in order to use AWS Lambda Powertools
-
-  ApiHealthcheckLambdaPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !Ref ApiHealthcheckLambda.Alias
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiApiGateway}/*/*"
-
-  ApiTokenLambdaPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !Ref ApiTokenLambda.Alias
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiApiGateway}/*/*"
-
-  ApiJourneyOutcomeLambdaPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !Ref ApiJourneyOutcomeLambda.Alias
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiApiGateway}/*/*"
-
-  ApiApiGateway5XXErrorsAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmDescription: "AMC private API Gateway is returning 5XX server errors. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/api-alarms-runbook.md"
-      Namespace: AWS/ApiGateway
-      MetricName: 5XXError
-      Dimensions:
-        - Name: ApiName
-          Value: !Ref ApiApiGateway
-      Statistic: Sum
-      Period: 300
-      EvaluationPeriods: 1
-      Threshold: 5
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - !If
-          - IsProduction
-          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn
-          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiApiGatewayHighLatencyAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: AWS/ApiGateway
-      MetricName: Latency
-      Dimensions:
-        - Name: ApiName
-          Value: !Ref ApiApiGateway
-      Statistic: Average
-      Period: 300
-      EvaluationPeriods: 2
-      Threshold: 5000
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiHealthcheckLambdaErrorsAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: !Sub "${AWS::StackName}/ApiHealthcheckLambda"
-      MetricName: Errors
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref ApiHealthcheckLambda
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      Threshold: 3
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiHealthcheckLambdaThrottlesAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: !Sub "${AWS::StackName}/ApiHealthcheckLambda"
-      MetricName: Throttles
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref ApiHealthcheckLambda
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 5
-      DatapointsToAlarm: 5
-      Threshold: 0
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiHealthcheckLambdaDurationAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: !Sub "${AWS::StackName}/ApiHealthcheckLambda"
-      MetricName: Duration
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref ApiHealthcheckLambda
-      ExtendedStatistic: p90
-      Period: 60
-      EvaluationPeriods: 15
-      DatapointsToAlarm: 15
-      Threshold: 1000
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiHealthcheckLambdaLogErrorMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiHealthcheckLambdaLogGroup
-      FilterPattern: '{ $.level = "ERROR" || $.level = "CRITICAL" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiHealthcheckLambda"
-          MetricName: ErrorAndCriticalLogCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  ApiHealthcheckLambdaLogErrorAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: !Sub "${AWS::StackName}/ApiHealthcheckLambda"
-      MetricName: ErrorAndCriticalLogCount
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      Threshold: 3
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiHealthcheckLambda5XXResponseMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiHealthcheckLambdaLogGroup
-      FilterPattern: '{ $.message = "Response" && $.statusCode >= 500 }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiHealthcheckLambda"
-          MetricName: 5XXResponseCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  ApiHealthcheckLambdaResponseCountMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiHealthcheckLambdaLogGroup
-      FilterPattern: '{ $.message = "Response" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiHealthcheckLambda"
-          MetricName: ResponseCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  ApiHealthcheckLambdaAvailabilityAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Metrics:
-        - Id: errors
-          MetricStat:
-            Metric:
-              Namespace: !Sub "${AWS::StackName}/ApiHealthcheckLambda"
-              MetricName: 5XXResponseCount
-            Period: 60
-            Stat: Sum
-          ReturnData: false
-        - Id: total
-          MetricStat:
-            Metric:
-              Namespace: !Sub "${AWS::StackName}/ApiHealthcheckLambda"
-              MetricName: ResponseCount
-            Period: 60
-            Stat: Sum
-          ReturnData: false
-        - Id: availability
-          Expression: "1 - (errors / total)"
-          Label: "Availability"
-          ReturnData: true
-      Threshold: 0.999
-      ComparisonOperator: LessThanThreshold
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiTokenLambdaErrorsAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmDescription: "AMC token lambda is producing invocation errors. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/api-alarms-runbook.md"
-      Namespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-      MetricName: Errors
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref ApiTokenLambda
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      Threshold: 3
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - !If
-          - IsProduction
-          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn
-          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiTokenLambdaThrottlesAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-      MetricName: Throttles
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref ApiTokenLambda
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 5
-      DatapointsToAlarm: 5
-      Threshold: 0
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiTokenLambdaDurationAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-      MetricName: Duration
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref ApiTokenLambda
-      ExtendedStatistic: p90
-      Period: 60
-      EvaluationPeriods: 15
-      DatapointsToAlarm: 15
-      Threshold: 1000
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiTokenLambdaColdStartDurationAnomalyAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsProduction
-    Properties:
-      AlarmDescription: "AMC token lambda cold start durations have increased significantly above what is expected. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/api-alarms-runbook.md"
-      Metrics:
-        - Id: initDuration
-          MetricStat:
-            Metric:
-              Namespace: AWS/Lambda
-              MetricName: InitDuration
-              Dimensions:
-                - Name: FunctionName
-                  Value: !Ref ApiTokenLambda
-            Period: 300
-            Stat: p90
-          ReturnData: true
-        - Id: band
-          Expression: ANOMALY_DETECTION_BAND(initDuration, 2)
-          ReturnData: true
-      ComparisonOperator: GreaterThanUpperThreshold
-      ThresholdMetricId: band
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      TreatMissingData: notBreaching
-      ActionsEnabled: false
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiTokenLambdaLogWarnByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiTokenLambdaLogGroup
-      FilterPattern: '{ $.level = "WARN" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-          MetricName: WarnLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: scope
-              Value: $.scope
-            - Key: client_id
-              Value: $.client_id
-
-  ApiTokenLambdaLogErrorByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiTokenLambdaLogGroup
-      FilterPattern: '{ $.level = "ERROR" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-          MetricName: ErrorLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: scope
-              Value: $.scope
-            - Key: client_id
-              Value: $.client_id
-
-  ApiTokenLambdaLogCriticalByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiTokenLambdaLogGroup
-      FilterPattern: '{ $.level = "CRITICAL" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-          MetricName: CriticalLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: scope
-              Value: $.scope
-            - Key: client_id
-              Value: $.client_id
-
-  ApiTokenLambdaLogErrorMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiTokenLambdaLogGroup
-      FilterPattern: '{ $.level = "ERROR" || $.level = "CRITICAL" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-          MetricName: ErrorAndCriticalLogCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  ApiTokenLambdaLogErrorAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmDescription: "AMC token lambda is logging ERROR or CRITICAL level messages at an elevated rate. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/api-alarms-runbook.md"
-      Namespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-      MetricName: ErrorAndCriticalLogCount
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      Threshold: 3
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - !If
-          - IsProduction
-          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn
-          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiTokenLambda5XXResponseMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiTokenLambdaLogGroup
-      FilterPattern: '{ $.message = "Response" && $.statusCode >= 500 }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-          MetricName: 5XXResponseCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  ApiTokenLambdaResponseCountMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiTokenLambdaLogGroup
-      FilterPattern: '{ $.message = "Response" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-          MetricName: ResponseCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  ApiTokenLambdaAvailabilityAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Metrics:
-        - Id: errors
-          MetricStat:
-            Metric:
-              Namespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-              MetricName: 5XXResponseCount
-            Period: 60
-            Stat: Sum
-          ReturnData: false
-        - Id: total
-          MetricStat:
-            Metric:
-              Namespace: !Sub "${AWS::StackName}/ApiTokenLambda"
-              MetricName: ResponseCount
-            Period: 60
-            Stat: Sum
-          ReturnData: false
-        - Id: availability
-          Expression: "1 - (errors / total)"
-          Label: "Availability"
-          ReturnData: true
-      Threshold: 0.999
-      ComparisonOperator: LessThanThreshold
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiJourneyOutcomeLambdaErrorsAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmDescription: "AMC journey outcome lambda is producing invocation errors. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/api-alarms-runbook.md"
-      Namespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-      MetricName: Errors
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref ApiJourneyOutcomeLambda
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      Threshold: 3
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - !If
-          - IsProduction
-          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn
-          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiJourneyOutcomeLambdaThrottlesAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-      MetricName: Throttles
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref ApiJourneyOutcomeLambda
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 5
-      DatapointsToAlarm: 5
-      Threshold: 0
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiJourneyOutcomeLambdaDurationAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Namespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-      MetricName: Duration
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref ApiJourneyOutcomeLambda
-      ExtendedStatistic: p90
-      Period: 60
-      EvaluationPeriods: 15
-      DatapointsToAlarm: 15
-      Threshold: 1000
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiJourneyOutcomeLambdaColdStartDurationAnomalyAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsProduction
-    Properties:
-      AlarmDescription: "AMC journey outcome lambda cold start durations have increased significantly above what is expected. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/api-alarms-runbook.md"
-      Metrics:
-        - Id: initDuration
-          MetricStat:
-            Metric:
-              Namespace: AWS/Lambda
-              MetricName: InitDuration
-              Dimensions:
-                - Name: FunctionName
-                  Value: !Ref ApiJourneyOutcomeLambda
-            Period: 300
-            Stat: p90
-          ReturnData: true
-        - Id: band
-          Expression: ANOMALY_DETECTION_BAND(initDuration, 2)
-          ReturnData: true
-      ComparisonOperator: GreaterThanUpperThreshold
-      ThresholdMetricId: band
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      TreatMissingData: notBreaching
-      ActionsEnabled: false
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiJourneyOutcomeLambdaLogWarnByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiJourneyOutcomeLambdaLogGroup
-      FilterPattern: '{ $.level = "WARN" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-          MetricName: WarnLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: scope
-              Value: $.scope
-            - Key: client_id
-              Value: $.client_id
-
-  ApiJourneyOutcomeLambdaLogErrorByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiJourneyOutcomeLambdaLogGroup
-      FilterPattern: '{ $.level = "ERROR" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-          MetricName: ErrorLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: scope
-              Value: $.scope
-            - Key: client_id
-              Value: $.client_id
-
-  ApiJourneyOutcomeLambdaLogCriticalByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiJourneyOutcomeLambdaLogGroup
-      FilterPattern: '{ $.level = "CRITICAL" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-          MetricName: CriticalLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: scope
-              Value: $.scope
-            - Key: client_id
-              Value: $.client_id
-
-  ApiJourneyOutcomeLambdaLogErrorMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiJourneyOutcomeLambdaLogGroup
-      FilterPattern: '{ $.level = "ERROR" || $.level = "CRITICAL" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-          MetricName: ErrorAndCriticalLogCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  ApiJourneyOutcomeLambdaLogErrorAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmDescription: "AMC journey outcome lambda is logging ERROR or CRITICAL level messages at an elevated rate. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/api-alarms-runbook.md"
-      Namespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-      MetricName: ErrorAndCriticalLogCount
-      Statistic: Sum
-      Period: 60
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      Threshold: 3
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - !If
-          - IsProduction
-          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn
-          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  ApiJourneyOutcomeLambda5XXResponseMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiJourneyOutcomeLambdaLogGroup
-      FilterPattern: '{ $.message = "Response" && $.statusCode >= 500 }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-          MetricName: 5XXResponseCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  ApiJourneyOutcomeLambdaResponseCountMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref ApiJourneyOutcomeLambdaLogGroup
-      FilterPattern: '{ $.message = "Response" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-          MetricName: ResponseCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  ApiJourneyOutcomeLambdaAvailabilityAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      Metrics:
-        - Id: errors
-          MetricStat:
-            Metric:
-              Namespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-              MetricName: 5XXResponseCount
-            Period: 60
-            Stat: Sum
-          ReturnData: false
-        - Id: total
-          MetricStat:
-            Metric:
-              Namespace: !Sub "${AWS::StackName}/ApiJourneyOutcomeLambda"
-              MetricName: ResponseCount
-            Period: 60
-            Stat: Sum
-          ReturnData: false
-        - Id: availability
-          Expression: "1 - (errors / total)"
-          Label: "Availability"
-          ReturnData: true
-      Threshold: 0.999
-      ComparisonOperator: LessThanThreshold
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
+        - Fn::ImportValue: !Sub ${AlertsStackName}-CriticalAlertsTopicArn # CHANGEME change as necessary for your application
 
   SessionSecret:
     Type: AWS::SecretsManager::Secret
@@ -2397,6 +411,11 @@ Resources:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
+    Metadata:
+      checkov:
+        skip:
+          - id: "CKV_AWS_28"
+            comment: "Sessions table does not require point in time recovery as session data is ephemeral"
     Properties:
       TableName: !Sub ${AWS::StackName}-SessionStore
       AttributeDefinitions:
@@ -2425,7 +444,7 @@ Resources:
       DomainName:
         !FindInMap [EnvironmentConfiguration, !Ref Environment, frontendDomain]
       RegionalCertificateArn:
-        Fn::ImportValue: certificate-CertificateARN
+        Fn::ImportValue: !Sub ${CertificateStackName}-CertificateARN
       EndpointConfiguration:
         Types:
           - REGIONAL
@@ -2445,7 +464,7 @@ Resources:
             ]
       Type: A
       HostedZoneId:
-        Fn::ImportValue: hosted-zone-HostedZoneID
+        Fn::ImportValue: !Sub ${HostedZoneStackName}-HostedZoneId
       AliasTarget:
         DNSName: !GetAtt FrontendApiDomain.RegionalDomainName
         HostedZoneId: !GetAtt FrontendApiDomain.RegionalHostedZoneId
@@ -2455,7 +474,7 @@ Resources:
     Type: "AWS::WAFv2::WebACLAssociation"
     Properties:
       WebACLArn:
-        Fn::ImportValue: "cloudfront-CloakingOriginWebACLArn"
+        Fn::ImportValue: !Sub ${CloudFrontStackName}-CloakingOriginWebACLArn
       ResourceArn: !Sub "arn:aws:apigateway:${AWS::Region}::/restapis/${FrontendApiGateway}/stages/${Environment}"
     DependsOn:
       - FrontendApiGatewayStage # This resource is created as part of the RestApi resource
@@ -2467,11 +486,11 @@ Resources:
         !FindInMap [EnvironmentConfiguration, !Ref Environment, frontendDomain]
       Type: A
       HostedZoneId:
-        Fn::ImportValue: hosted-zone-HostedZoneID
+        Fn::ImportValue: !Sub ${HostedZoneStackName}-HostedZoneId
       AliasTarget:
         DNSName:
-          Fn::ImportValue: "cloudfront-DistributionDomain"
-        HostedZoneId: "Z2FDTNDATAQYW2"
+          Fn::ImportValue: !Sub ${CloudFrontStackName}-DistributionDomain
+        HostedZoneId: "Z2FDTNDATAQYW2" # CloudFront hosted zone ID
         EvaluateTargetHealth: false
 
   FrontendApiMapping:
@@ -2485,8 +504,12 @@ Resources:
 
   FrontendApiGateway:
     Type: AWS::Serverless::Api
+    Metadata:
+      checkov:
+        skip:
+          - id: "CKV_AWS_120"
+            comment: "We don't want API Gateway to cache responses"
     Properties:
-      Description: Account Components Frontend API
       StageName: !Ref Environment
       AlwaysDeploy: true
       DisableExecuteApiEndpoint: true
@@ -2506,13 +529,11 @@ Resources:
           "httpMethod": "$context.httpMethod",
           "domainName": "$context.domainName",
           "path": "$context.path",
-          "routeKey": "$context.routeKey",
           "protocol": "$context.protocol",
           "status": "$context.status",
           "responseLength": "$context.responseLength",
           "responseLatency": "$context.responseLatency",
           "authorizerLatency": "$context.authorizer.latency",
-          "integrationStatus": "$context.integrationStatus",
           "integrationLatency": "$context.integrationLatency",
           "integrationErrorMessage": "$context.integrationErrorMessage",
           "errorMessage": "$context.error.message",
@@ -2541,23 +562,21 @@ Resources:
   FrontendLambda:
     Type: AWS::Serverless::Function
     Metadata:
+      checkov:
+        skip:
+          - id: "CKV_AWS_116"
+            comment: "This lambda does not need a dead letter queue"
       BuildMethod: makefile
     Properties:
       CodeUri: solutions/frontend/dist
       Handler: lambda.handler
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdB
-          - Fn::ImportValue: !Sub ${VpcStackName}-ProtectedSubnetIdC
+      ReservedConcurrentExecutions: 500
       DeploymentPreference:
         Alarms:
           - !Ref FrontendLambdaErrorsAlarm
           - !Ref FrontendLambdaThrottlesAlarm
           - !Ref FrontendLambdaAvailabilityAlarm
           - !Ref FrontendLambdaLogErrorAlarm
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 1
       LoggingConfig:
         LogGroup: !Ref FrontendLambdaLogGroup
       Events:
@@ -2583,16 +602,6 @@ Resources:
               !Ref Environment,
               rootDomainWithEnv,
             ]
-          NOTIFICATIONS_QUEUE_URL: !GetAtt NotificationsQueue.QueueUrl
-          AUTH_CODE_TABLE_NAME: !Ref AuthCodeTable
-          JOURNEY_OUTCOME_TABLE_NAME: !Ref JourneyOutcomeTable
-          AUTHORIZE_ENDPOINT_URL:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              authorizeEndpointUrl,
-            ]
-          AUDIT_EVENTS_QUEUE_URL: !GetAtt TxMASQSProducerAuditEventQueue.QueueUrl
           AUTH_FRONTEND_URL:
             !FindInMap [
               EnvironmentConfiguration,
@@ -2611,66 +620,12 @@ Resources:
               !Ref Environment,
               ga4ContainerId,
             ]
-          ACCOUNT_MANAGEMENT_API_URL:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              accountManagementApiUrl,
-            ]
-          ACCOUNT_INTERVENTIONS_SERVICE_API_URL:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              accountInterventionsServiceApiUrl,
-            ]
-          CONTACT_URL:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, contactUrl]
-          PASSKEYS_RP_ID:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              passkeysRpId,
-            ]
-          PASSKEYS_RP_NAME:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              passkeysRpName,
-            ]
-          PASSKEYS_EXPECTED_ORIGIN:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              passkeysExpectedOrigin,
-            ]
-          YOUR_SERVICES_URL:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              yourServicesUrl,
-            ]
-          SECURITY_URL:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, securityUrl]
           ANALYTICS_ENABLED:
             !FindInMap [
               EnvironmentConfiguration,
               !Ref Environment,
               analyticsEnabled,
             ]
-          DYNATRACE_RUM_URL:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              dynatraceRumUrl,
-            ]
-          ACCOUNT_DATA_API_URL:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              accountDataApiUrl,
-            ]
-          JAR_RSA_ENCRYPTION_KEY_ALIAS: !Ref JARRSAEncryptionKeyAlias
-          REPLAY_ATTACK_TABLE_NAME: !Ref ReplayAttackTable
       Policies:
         - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
         - Statement:
@@ -2683,40 +638,6 @@ Resources:
                 - dynamodb:Scan
                 - dynamodb:UpdateItem
               Resource: !GetAtt SessionsTable.Arn
-            - Effect: Allow
-              Action:
-                - dynamodb:PutItem
-              Resource:
-                - !GetAtt AuthCodeTable.Arn
-                - !GetAtt JourneyOutcomeTable.Arn
-                - !GetAtt ReplayAttackTable.Arn
-            - Effect: Allow
-              Action:
-                - kms:Decrypt
-                - kms:GenerateDataKey
-              Resource: !GetAtt DynamoDbSSEKey.Arn
-            - Effect: Allow
-              Action:
-                - kms:DescribeKey
-                - kms:Decrypt
-              Resource: !GetAtt JARRSAEncryptionKey.Arn
-            - Effect: Allow
-              Action:
-                - appconfig:GetLatestConfiguration
-                - appconfig:StartConfigurationSession
-              Resource: !Sub arn:aws:appconfig:${AWS::Region}:${AWS::AccountId}:application/*
-            - Effect: Allow
-              Action:
-                - sqs:SendMessage
-              Resource:
-                - !GetAtt NotificationsQueue.Arn
-                - !GetAtt TxMASQSProducerAuditEventQueue.Arn
-            - Effect: Allow
-              Action:
-                - kms:GenerateDataKey
-              Resource:
-                - !GetAtt SqsKmsKey.Arn
-                - !GetAtt TxMASQSProducerAuditEventQueueEncryptionKey.Arn
 
   FrontendLambdaLogGroup:
     Type: AWS::Logs::LogGroup
@@ -2728,7 +649,6 @@ Resources:
   FrontendApiGateway5XXErrorsAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: "AMC frontend API Gateway is returning 5XX server errors. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/frontend-alarms-runbook.md"
       Namespace: AWS/ApiGateway
       MetricName: 5XXError
       Dimensions:
@@ -2743,8 +663,8 @@ Resources:
       AlarmActions:
         - !If
           - IsProduction
-          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn
-          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
+          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn # CHANGEME change as necessary for your application
+          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
   FrontendApiGatewayHighLatencyAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -2761,12 +681,11 @@ Resources:
       ComparisonOperator: GreaterThanThreshold
       TreatMissingData: notBreaching
       AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
+        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
   FrontendLambdaErrorsAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: "AMC frontend lambda is producing invocation errors. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/frontend-alarms-runbook.md"
       Namespace: !Sub "${AWS::StackName}/FrontendLambda"
       MetricName: Errors
       Dimensions:
@@ -2782,8 +701,8 @@ Resources:
       AlarmActions:
         - !If
           - IsProduction
-          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn
-          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
+          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn # CHANGEME change as necessary for your application
+          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
   FrontendLambdaThrottlesAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -2801,58 +720,7 @@ Resources:
       ComparisonOperator: GreaterThanThreshold
       TreatMissingData: notBreaching
       AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
-
-  FrontendLambdaLogWarnByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref FrontendLambdaLogGroup
-      FilterPattern: '{ $.level = "WARN" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/FrontendLambda"
-          MetricName: WarnLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: scope
-              Value: $.scope
-            - Key: client_id
-              Value: $.client_id
-            - Key: path
-              Value: $.path
-
-  FrontendLambdaLogErrorByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref FrontendLambdaLogGroup
-      FilterPattern: '{ $.level = "ERROR" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/FrontendLambda"
-          MetricName: ErrorLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: scope
-              Value: $.scope
-            - Key: client_id
-              Value: $.client_id
-            - Key: path
-              Value: $.path
-
-  FrontendLambdaLogCriticalByContextMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref FrontendLambdaLogGroup
-      FilterPattern: '{ $.level = "CRITICAL" }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/FrontendLambda"
-          MetricName: CriticalLogCountByContext
-          MetricValue: "1"
-          Dimensions:
-            - Key: scope
-              Value: $.scope
-            - Key: client_id
-              Value: $.client_id
-            - Key: path
-              Value: $.path
+        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
   FrontendLambdaLogErrorMetricFilter:
     Type: AWS::Logs::MetricFilter
@@ -2868,7 +736,6 @@ Resources:
   FrontendLambdaLogErrorAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: "AMC frontend lambda is logging ERROR or CRITICAL level messages at an elevated rate. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/frontend-alarms-runbook.md"
       Namespace: !Sub "${AWS::StackName}/FrontendLambda"
       MetricName: ErrorAndCriticalLogCount
       Statistic: Sum
@@ -2881,8 +748,8 @@ Resources:
       AlarmActions:
         - !If
           - IsProduction
-          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn
-          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
+          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn # CHANGEME change as necessary for your application
+          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
   FrontendLambda5XXResponseMetricFilter:
     Type: AWS::Logs::MetricFilter
@@ -2936,7 +803,7 @@ Resources:
       DatapointsToAlarm: 3
       TreatMissingData: notBreaching
       AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
+        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
   FrontendLambdaDurationAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -2954,13 +821,12 @@ Resources:
       ComparisonOperator: GreaterThanThreshold
       TreatMissingData: notBreaching
       AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
+        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
   FrontendLambdaColdStartDurationAnomalyAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProduction
     Properties:
-      AlarmDescription: "AMC frontend lambda cold start durations have increased significantly above what is expected. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/frontend-alarms-runbook.md"
       Metrics:
         - Id: initDuration
           MetricStat:
@@ -2983,13 +849,12 @@ Resources:
       TreatMissingData: notBreaching
       ActionsEnabled: false
       AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn
+        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
   FrontendApiGatewayTrafficAnomalyAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProduction
     Properties:
-      AlarmDescription: "AMC frontend API Gateway traffic has dropped significantly below expected levels. Runbook: https://github.com/govuk-one-login/account-components/blob/main/runbooks/frontend-alarms-runbook.md"
       Metrics:
         - Id: traffic
           MetricStat:
@@ -3012,950 +877,4 @@ Resources:
       TreatMissingData: notBreaching
       ActionsEnabled: false
       AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn
-
-  StubsMockClientECPrivateKeySSM:
-    Type: AWS::SSM::Parameter
-    Condition: IsDevOrBuild
-    Properties:
-      Description: A mock client EC private key
-      Name: !Sub /${AWS::StackName}/MockClientEcPrivateKey
-      Type: String
-      Value: "set-me"
-      Tags:
-        Environment: !Ref Environment
-
-  StubsMockClientECPublicKeySSM:
-    Type: AWS::SSM::Parameter
-    Condition: IsDevOrBuild
-    Properties:
-      Description: A mock client EC public key
-      Name: !Sub /${AWS::StackName}/MockClientEcPublicKey
-      Type: String
-      Value: "set-me"
-      Tags:
-        Environment: !Ref Environment
-
-  StubsMockClientRSAPrivateKeySSM:
-    Type: AWS::SSM::Parameter
-    Condition: IsDevOrBuild
-    Properties:
-      Description: A mock client RSA private key
-      Name: !Sub /${AWS::StackName}/MockClientRsaPrivateKey
-      Type: String
-      Value: "set-me"
-      Tags:
-        Environment: !Ref Environment
-
-  StubsMockClientRSAPublicKeySSM:
-    Type: AWS::SSM::Parameter
-    Condition: IsDevOrBuild
-    Properties:
-      Description: A mock client RSA public key
-      Name: !Sub /${AWS::StackName}/MockClientRsaPublicKey
-      Type: String
-      Value: "set-me"
-      Tags:
-        Environment: !Ref Environment
-
-  StubsApiDomain:
-    Type: AWS::ApiGateway::DomainName
-    Condition: IsDevOrBuild
-    Properties:
-      DomainName:
-        !FindInMap [EnvironmentConfiguration, !Ref Environment, stubsDomain]
-      RegionalCertificateArn:
-        Fn::ImportValue: certificate-CertificateARN
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
-      SecurityPolicy: SecurityPolicy_TLS13_1_2_FIPS_PQ_2025_09
-      EndpointAccessMode: STRICT
-
-  StubsRecord:
-    Type: AWS::Route53::RecordSet
-    Condition: IsDevOrBuild
-    Properties:
-      Name: !Ref StubsApiDomain
-      Type: A
-      HostedZoneId:
-        Fn::ImportValue: hosted-zone-HostedZoneID
-      AliasTarget:
-        DNSName: !GetAtt StubsApiDomain.RegionalDomainName
-        HostedZoneId: !GetAtt StubsApiDomain.RegionalHostedZoneId
-        EvaluateTargetHealth: false
-
-  StubsApiMapping:
-    Type: AWS::ApiGateway::BasePathMapping
-    Condition: IsDevOrBuild
-    Properties:
-      DomainName: !Ref StubsApiDomain
-      RestApiId: !Ref StubsApiGateway
-      Stage: !Ref Environment
-    DependsOn:
-      - StubsApiGatewayStage # This resource is created as part of the RestApi resource
-
-  StubsApiGateway:
-    Type: AWS::Serverless::Api
-    Condition: IsDevOrBuild
-    Properties:
-      Description: Account Components Stub API
-      StageName: !Ref Environment
-      AlwaysDeploy: true
-      DisableExecuteApiEndpoint: true
-      TracingEnabled: true
-      EndpointConfiguration:
-        Type: REGIONAL
-      BinaryMediaTypes: !If
-        - IsLocal
-        - !Ref AWS::NoValue
-        - - "*/*"
-      AccessLogSetting:
-        Format: >-
-          {
-          "requestId": "$context.requestId",
-          "requestTime": "$context.requestTime",
-          "requestTimeEpoch": "$context.requestTimeEpoch",
-          "httpMethod": "$context.httpMethod",
-          "domainName": "$context.domainName",
-          "path": "$context.path",
-          "routeKey": "$context.routeKey",
-          "protocol": "$context.protocol",
-          "status": "$context.status",
-          "responseLength": "$context.responseLength",
-          "responseLatency": "$context.responseLatency",
-          "authorizerLatency": "$context.authorizer.latency",
-          "integrationStatus": "$context.integrationStatus",
-          "integrationLatency": "$context.integrationLatency",
-          "integrationErrorMessage": "$context.integrationErrorMessage",
-          "errorMessage": "$context.error.message",
-          "errorResponseType": "$context.error.responseType",
-          "validationErrorString": "$context.error.validationErrorString",
-          "xrayTraceId": "$context.xrayTraceId",
-          "tlsVersion": "$context.tlsVersion",
-          "cipherSuite": "$context.cipherSuite"
-          }
-        DestinationArn: !GetAtt StubsApiGatewayAccessLogGroup.Arn
-      MethodSettings:
-        - MetricsEnabled: true
-          CacheDataEncrypted: true
-          ResourcePath: /*
-          HttpMethod: "*"
-      Tags:
-        FMSRegionalPolicy: false
-        CustomPolicy: mock
-
-  StubsApiGatewayAccessLogGroup:
-    Type: AWS::Logs::LogGroup
-    Condition: IsDevOrBuild
-    Properties:
-      LogGroupName: !Sub "/aws/apigateway/${StubsApiGateway}/${Environment}"
-      RetentionInDays: 30
-      KmsKeyId: !GetAtt CloudWatchEncryptionKey.Arn
-
-  StubsLambda:
-    Type: AWS::Serverless::Function
-    Condition: IsDevOrBuild
-    Metadata:
-      BuildMethod: makefile
-    Properties:
-      CodeUri: solutions/stubs/dist
-      Handler: lambda.handler
-      LoggingConfig:
-        LogGroup: !Ref StubsLambdaLogGroup
-      Events:
-        Root:
-          Type: Api
-          Properties:
-            Method: ANY
-            Path: /
-            RestApiId: !Ref StubsApiGateway
-        CatchAll:
-          Type: Api
-          Properties:
-            Method: ANY
-            Path: /{proxy+}
-            RestApiId: !Ref StubsApiGateway
-      Environment:
-        Variables:
-          MOCK_CLIENT_EC_PRIVATE_KEY_SSM_NAME: !Sub "/${AWS::StackName}/MockClientEcPrivateKey"
-          MOCK_CLIENT_EC_PUBLIC_KEY_SSM_NAME: !Sub "/${AWS::StackName}/MockClientEcPublicKey"
-          MOCK_CLIENT_RSA_PRIVATE_KEY_SSM_NAME: !Sub "/${AWS::StackName}/MockClientRsaPrivateKey"
-          MOCK_CLIENT_RSA_PUBLIC_KEY_SSM_NAME: !Sub "/${AWS::StackName}/MockClientRsaPublicKey"
-          JAR_RSA_ENCRYPTION_KEY_ALIAS: !Ref JARRSAEncryptionKeyAlias
-          DEFAULT_AUDIENCE: !Sub "https://manage.${Environment}.account.gov.uk/authorize"
-          ACCESS_TOKEN_ISSUER: !Sub "https://stubs.manage.${Environment}.account.gov.uk"
-          AUTHORIZE_URL: !Sub "https://manage.${Environment}.account.gov.uk/authorize"
-          API_BASE_URL: !Sub "https://${ApiApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiStageName}"
-          ROOT_DOMAIN:
-            !FindInMap [EnvironmentConfiguration, !Ref Environment, rootDomain]
-          NOTIFY_DONT_SEND_EMAILS_TO:
-            !FindInMap [
-              EnvironmentConfiguration,
-              !Ref Environment,
-              notifyDontSendEmailsTo,
-            ]
-      Policies:
-        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-        - Statement:
-            - Effect: Allow
-              Action:
-                - ssm:GetParameter
-                - ssm:GetParameters
-                - ssm:GetParametersByPath
-              Resource:
-                - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AWS::StackName}/MockClientEcPublicKey
-                - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AWS::StackName}/MockClientEcPrivateKey
-                - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AWS::StackName}/MockClientRsaPublicKey
-                - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AWS::StackName}/MockClientRsaPrivateKey
-            - Effect: Allow
-              Action:
-                - appconfig:GetLatestConfiguration
-                - appconfig:StartConfigurationSession
-              Resource: !Sub arn:aws:appconfig:${AWS::Region}:${AWS::AccountId}:application/*
-            - Effect: Allow
-              Action:
-                - kms:DescribeKey
-                - kms:GetPublicKey
-              Resource: !GetAtt JARRSAEncryptionKey.Arn
-
-  StubsLambdaLogGroup:
-    Type: AWS::Logs::LogGroup
-    Condition: IsDevOrBuild
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}/StubsLambda"
-      RetentionInDays: 30
-      KmsKeyId: !GetAtt CloudWatchEncryptionKey.Arn
-
-  Dashboard:
-    Type: AWS::CloudWatch::Dashboard
-    Properties:
-      DashboardName: !Sub "${AWS::StackName}-dashboard"
-      DashboardBody: !Sub |
-        {
-          "widgets": [
-            {
-              "type": "text",
-              "properties": {
-                "markdown": "# Requests",
-                "background": "transparent"
-              },
-              "width": 24,
-              "height": 2
-            },       
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('MetricName=\"ResponseCount\"', 'Sum')),0)", "id": "all_responses" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('MetricName=\"5XXResponseCount\"', 'Sum')),0)", "id": "server_error_responses" } ]
-                ],
-                "view": "timeSeries",
-                "title": "Availability",
-                "region": "${AWS::Region}"
-              },
-              "width": 18,
-              "height": 6          
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('MetricName=\"ResponseCount\"', 'Sum')),0)", "id": "all_responses", "visible": false } ],
-                  [ { "expression": "FILL(SUM(SEARCH('MetricName=\"5XXResponseCount\"', 'Sum')),0)", "id": "server_error_responses", "visible": false } ],
-                  [ { "expression": "((all_responses - server_error_responses) / all_responses) * 100", "id": "availability" } ]
-                ],
-                "view": "singleValue",
-                "singleValueFullPrecision": true,
-                "title": "Availability (%)",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 6,
-              "height": 6
-            },  
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/FrontendLambda' | fields method, path, total | filter message = 'Request' | stats count(*) as total by method, path | sort total desc",
-                "region": "${AWS::Region}",
-                "title": "Frontend requests"
-              },
-              "width": 12
-            },             
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/FrontendLambda' | fields method, path, statusCode, total | filter message = 'Response' | stats count(*) as total by method, path, statusCode | sort total desc",
-                "region": "${AWS::Region}",
-                "title": "Frontend responses"
-              },
-              "width": 12
-            },                          
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyStarted\"', 'Sum')),0)", "id": "started__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyStarted\" client_id=auth scope=\"passkey-create\"', 'Sum')),0)", "id": "started__auth__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyStarted\" client_id=home scope=\"passkey-create\"', 'Sum')),0)", "id": "started__home__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyStarted\" client_id=auth scope=\"account-delete\"', 'Sum')),0)", "id": "started__auth__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyStarted\" client_id=home scope=\"account-delete\"', 'Sum')),0)", "id": "started__home__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyStarted\" client_id=auth scope=\"testing-journey\"', 'Sum')),0)", "id": "started__auth__testing_journey" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyStarted\" client_id=home scope=\"testing-journey\"', 'Sum')),0)", "id": "started__home__testing_journey" } ],
-
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\"', 'Sum')),0)", "id": "completed_successfully__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=auth scope=\"passkey-create\"', 'Sum')),0)", "id": "completed_successfully__auth__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=home scope=\"passkey-create\"', 'Sum')),0)", "id": "completed_successfully__home__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=auth scope=\"account-delete\"', 'Sum')),0)", "id": "completed_successfully__auth__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=home scope=\"account-delete\"', 'Sum')),0)", "id": "completed_successfully__home__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=auth scope=\"testing-journey\"', 'Sum')),0)", "id": "completed_successfully__auth__testing_journey" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=home scope=\"testing-journey\"', 'Sum')),0)", "id": "completed_successfully__home__testing_journey" } ],                  
-
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedUnsuccessfully\"', 'Sum')),0)", "id": "completed_unsuccessfully__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedUnsuccessfully\" client_id=auth scope=\"passkey-create\"', 'Sum')),0)", "id": "completed_unsuccessfully__auth__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedUnsuccessfully\" client_id=home scope=\"passkey-create\"', 'Sum')),0)", "id": "completed_unsuccessfully__home__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedUnsuccessfully\" client_id=auth scope=\"account-delete\"', 'Sum')),0)", "id": "completed_unsuccessfully__auth__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedUnsuccessfully\" client_id=home scope=\"account-delete\"', 'Sum')),0)", "id": "completed_unsuccessfully__home__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedUnsuccessfully\" client_id=auth scope=\"testing-journey\"', 'Sum')),0)", "id": "completed_unsuccessfully__auth__testing_journey" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedUnsuccessfully\" client_id=home scope=\"testing-journey\"', 'Sum')),0)", "id": "completed_unsuccessfully__home__testing_journey" } ]                                    
-                ],
-                "view": "timeSeries",
-                "title": "Journeys started and completed",
-                "region": "${AWS::Region}"
-              },
-              "width": 14,
-              "height": 4              
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\"', 'Sum'))", "id": "completed_successfully__total" } ]
-                ],
-                "view": "singleValue",
-                "singleValueFullPrecision": true,
-                "title": "Journeys successfully completed",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 5,
-              "height": 4
-            },            
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=auth scope=\"passkey-create\"', 'Sum'))", "id": "completed_successfully__auth__passkey_create" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=home scope=\"passkey-create\"', 'Sum'))", "id": "completed_successfully__home__passkey_create" } ],      
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=auth scope=\"account-delete\"', 'Sum'))", "id": "completed_successfully__auth__account_delete" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=home scope=\"account-delete\"', 'Sum'))", "id": "completed_successfully__home__account_delete" } ],      
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=auth scope=\"testing-journey\"', 'Sum'))", "id": "completed_successfully__auth__testing_journey" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" client_id=home scope=\"testing-journey\"', 'Sum'))", "id": "completed_successfully__home__testing_journey" } ]
-                ],
-                "view": "pie",
-                "title": "Journeys successfully completed by client and scope",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 5,              
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithoutContext\"', 'Sum')),0)", "id": "without_context__total" } ],
-
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\"', 'Sum')),0)", "id": "with_context__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=auth scope=\"passkey-create\"', 'Sum')),0)", "id": "with_context__auth__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=home scope=\"passkey-create\"', 'Sum')),0)", "id": "with_context__home__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=auth scope=\"account-delete\"', 'Sum')),0)", "id": "with_context__auth__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=home scope=\"account-delete\"', 'Sum')),0)", "id": "with_context__home__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=auth scope=\"testing-journey\"', 'Sum')),0)", "id": "with_context__auth__testing_journey" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=home scope=\"testing-journey\"', 'Sum')),0)", "id": "with_context__home__testing_journey" } ],                                    
-
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeError\"', 'Sum')),0)", "id": "error__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeError\" client_id=auth scope=\"passkey-create\"', 'Sum')),0)", "id": "error__auth__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeError\" client_id=home scope=\"passkey-create\"', 'Sum')),0)", "id": "error__home__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeError\" client_id=auth scope=\"account-delete\"', 'Sum')),0)", "id": "error__auth__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeError\" client_id=home scope=\"account-delete\"', 'Sum')),0)", "id": "error__home__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeError\" client_id=auth scope=\"testing-journey\"', 'Sum')),0)", "id": "error__auth__testing_journey" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeError\" client_id=home scope=\"testing-journey\"', 'Sum')),0)", "id": "error__home__testing_journey" } ]
-                ],
-                "view": "timeSeries",
-                "title": "Authorize requests and errors",
-                "region": "${AWS::Region}"
-              },
-              "width": 14,
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\"', 'Sum'))", "id": "with_context__total" } ]
-                ],
-                "view": "singleValue",
-                "singleValueFullPrecision": true,
-                "title": "Authorize requests",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 5,              
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=auth scope=\"passkey-create\"', 'Sum'))", "id": "with_context__auth__passkey_create" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=home scope=\"passkey-create\"', 'Sum'))", "id": "with_context__home__passkey_create" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=auth scope=\"account-delete\"', 'Sum'))", "id": "with_context__auth__account_delete" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=home scope=\"account-delete\"', 'Sum'))", "id": "with_context__home__account_delete" } ],    
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=auth scope=\"testing-journey\"', 'Sum'))", "id": "with_context__auth__testing_journey" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"AuthorizeRequestWithContext\" client_id=home scope=\"testing-journey\"', 'Sum'))", "id": "with_context__home__testing_journey" } ]
-                ],
-                "view": "pie",
-                "title": "Authorize requests by client and scope",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 5,              
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithoutContext\"', 'Sum')),0)", "id": "without_context__total" } ],
-
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\"', 'Sum')),0)", "id": "with_context__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=auth scope=\"passkey-create\"', 'Sum')),0)", "id": "with_context__auth__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=home scope=\"passkey-create\"', 'Sum')),0)", "id": "with_context__home__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=auth scope=\"account-delete\"', 'Sum')),0)", "id": "with_context__auth__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=home scope=\"account-delete\"', 'Sum')),0)", "id": "with_context__home__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=auth scope=\"testing-journey\"', 'Sum')),0)", "id": "with_context__auth__testing_journey" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=home scope=\"testing-journey\"', 'Sum')),0)", "id": "with_context__home__testing_journey" } ],                                    
-
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestError\"', 'Sum')),0)", "id": "error__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestError\" client_id=auth scope=\"passkey-create\"', 'Sum')),0)", "id": "error__auth__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestError\" client_id=home scope=\"passkey-create\"', 'Sum')),0)", "id": "error__home__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestError\" client_id=auth scope=\"account-delete\"', 'Sum')),0)", "id": "error__auth__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestError\" client_id=home scope=\"account-delete\"', 'Sum')),0)", "id": "error__home__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestError\" client_id=auth scope=\"testing-journey\"', 'Sum')),0)", "id": "error__auth__testing_journey" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestError\" client_id=home scope=\"testing-journey\"', 'Sum')),0)", "id": "error__home__testing_journey" } ]                 
-                ],
-                "view": "timeSeries",
-                "title": "Journey requests and errors",
-                "region": "${AWS::Region}"
-              },
-              "width": 14,
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\"', 'Sum'))", "id": "with_context__total" } ]
-                ],
-                "view": "singleValue",
-                "singleValueFullPrecision": true,
-                "title": "Journey requests",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 5,              
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=auth scope=\"passkey-create\"', 'Sum'))", "id": "with_context__auth__passkey_create" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=home scope=\"passkey-create\"', 'Sum'))", "id": "with_context__home__passkey_create" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=auth scope=\"account-delete\"', 'Sum'))", "id": "with_context__auth__account_delete" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=home scope=\"account-delete\"', 'Sum'))", "id": "with_context__home__account_delete" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=auth scope=\"testing-journey\"', 'Sum'))", "id": "with_context__auth__testing_journey" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyRequestWithContext\" client_id=home scope=\"testing-journey\"', 'Sum'))", "id": "with_context__home__testing_journey" } ]                                 
-                ],
-                "view": "pie",
-                "title": "Journey requests by client and scope",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 5,              
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"TokenRequestWithoutContext\"', 'Sum')),0)", "id": "without_context__total" } ],
-
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"TokenRequestWithContext\"', 'Sum')),0)", "id": "with_context__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"TokenRequestWithContext\" client_id=auth', 'Sum')),0)", "id": "with_context__auth" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"TokenRequestWithContext\" client_id=home', 'Sum')),0)", "id": "with_context__home" } ],
-
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"TokenError\"', 'Sum')),0)", "id": "error__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"TokenError\" client_id=auth', 'Sum')),0)", "id": "error__auth" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"TokenError\" client_id=home', 'Sum')),0)", "id": "error__home" } ]                  
-                ],
-                "view": "timeSeries",
-                "title": "Token requests and errors",
-                "region": "${AWS::Region}"
-              },
-              "width": 14,
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"TokenRequestWithContext\"', 'Sum'))", "id": "with_context__total" } ]
-                ],
-                "view": "singleValue",
-                "singleValueFullPrecision": true,
-                "title": "Token requests",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 5,              
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"TokenRequestWithContext\" client_id=auth', 'Sum'))", "id": "with_context__auth" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"TokenRequestWithContext\" client_id=home', 'Sum'))", "id": "with_context__home" } ]
-                ],
-                "view": "pie",
-                "title": "Token requests by client",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 5,              
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithoutContext\"', 'Sum')),0)", "id": "without_context__total" } ],
-
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\"', 'Sum')),0)", "id": "with_context__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"passkey-create\"', 'Sum')),0)", "id": "with_context__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"passkey-create\"', 'Sum')),0)", "id": "with_context__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"account-delete\"', 'Sum')),0)", "id": "with_context__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"account-delete\"', 'Sum')),0)", "id": "with_context__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"testing-journey\"', 'Sum')),0)", "id": "with_context__testing_journey" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"testing-journey\"', 'Sum')),0)", "id": "with_context__testing_journey" } ],                                    
-
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeError\"', 'Sum')),0)", "id": "error__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeError\" scope=\"passkey-create\"', 'Sum')),0)", "id": "error__passkey_create" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeError\" scope=\"passkey-create\"', 'Sum')),0)", "id": "error__passkey_create" } ],    
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeError\" scope=\"account-delete\"', 'Sum')),0)", "id": "error__account_delete" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeError\" scope=\"account-delete\"', 'Sum')),0)", "id": "error__account_delete" } ],    
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeError\" scope=\"testing-journey\"', 'Sum')),0)", "id": "error__testing_journey" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeError\" scope=\"testing-journey\"', 'Sum')),0)", "id": "error__testing_journey" } ]                                                 
-                ],
-                "view": "timeSeries",
-                "title": "Journey outcome requests and errors",
-                "region": "${AWS::Region}"
-              },
-              "width": 14,
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\"', 'Sum'))", "id": "with_context__total" } ]
-                ],
-                "view": "singleValue",
-                "singleValueFullPrecision": true,
-                "title": "Journey outcome requests",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 5,              
-              "height": 4
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"passkey-create\"', 'Sum'))", "id": "with_context__passkey_create" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"passkey-create\"', 'Sum'))", "id": "with_context__passkey_create" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"account-delete\"', 'Sum'))", "id": "with_context__account_delete" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"account-delete\"', 'Sum'))", "id": "with_context__account_delete" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"testing-journey\"', 'Sum'))", "id": "with_context__testing_journey" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyOutcomeRequestWithContext\" scope=\"testing-journey\"', 'Sum'))", "id": "with_context__testing_journey" } ]                                    
-                ],
-                "view": "pie",
-                "title": "Journey outcome requests by scope",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 5,              
-              "height": 4
-            },
-            {
-              "type": "text",
-              "properties": {
-                "markdown": "&nbsp;\n# Lambdas",
-                "background": "transparent"
-              },
-              "width": 24,
-              "height": 3
-            },   
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SEARCH('{AWS/Lambda} MetricName=\"ConcurrentExecutions\"', 'Maximum'),0)", "id": "total" } ]
-                ],
-                "view": "timeSeries",
-                "title": "Concurrent lambda executions",
-                "region": "${AWS::Region}"
-              },
-              "width": 12,
-              "height": 4
-            }, 
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SEARCH('{AWS/Lambda} MetricName=\"Invocations\"', 'Sum'),0)", "id": "total" } ]
-                ],
-                "view": "timeSeries",
-                "title": "Lambda invocations",
-                "region": "${AWS::Region}"
-              },
-              "width": 12,
-              "height": 4
-            },                     
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"${AWS::StackName}/FrontendLambda\" MetricName=\"CriticalLogCountByContext\"', 'Sum')),0)", "id": "critical__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"${AWS::StackName}/FrontendLambda\" MetricName=\"ErrorLogCountByContext\"', 'Sum')),0)", "id": "error__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"${AWS::StackName}/FrontendLambda\" MetricName=\"WarnLogCountByContext\"', 'Sum')),0)", "id": "warn__total" } ]
-                ],
-                "view": "timeSeries",
-                "title": "Frontend lambda warnings/errors",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4              
-            },
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/FrontendLambda' | filter @type = \"REPORT\" | fields coalesce(@initDuration, 0) as InitDuration | stats pct(InitDuration + @duration, 90) as P90TotalDuration by bin(5m)",
-                "view": "bar",
-                "title": "Frontend lambda duration (p90) in milliseconds",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4
-            },             
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/FrontendLambda' | filter @type = \"REPORT\" | stats (count(@initDuration)/count(*))*100 as ColdStartRatePercent by bin(5m)",
-                "view": "bar",
-                "title": "Frontend lambda cold start rate (%)",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4
-            },   
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/FrontendLambda' | filter @type = \"REPORT\" | stats pct(@initDuration, 90) as ColdStartP90Duration by bin(5m)",
-                "view": "bar",
-                "title": "Frontend lambda cold start duration (p90) in milliseconds",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4
-            },             
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"${AWS::StackName}/ApiTokenLambda\" MetricName=\"CriticalLogCountByContext\"', 'Sum')),0)", "id": "critical__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"${AWS::StackName}/ApiTokenLambda\" MetricName=\"ErrorLogCountByContext\"', 'Sum')),0)", "id": "error__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"${AWS::StackName}/ApiTokenLambda\" MetricName=\"WarnLogCountByContext\"', 'Sum')),0)", "id": "warn__total" } ]
-                ],
-                "view": "timeSeries",
-                "title": "Token lambda warnings/errors",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4              
-            }, 
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/ApiTokenLambda' | filter @type = \"REPORT\" | fields coalesce(@initDuration, 0) as InitDuration | stats pct(InitDuration + @duration, 90) as P90TotalDuration by bin(5m)",
-                "view": "bar",
-                "title": "Token lambda duration (p90) in milliseconds",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4
-            },              
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/ApiTokenLambda' | filter @type = \"REPORT\" | stats (count(@initDuration)/count(*))*100 as ColdStartRatePercent by bin(5m)",
-                "view": "bar",
-                "title": "Token lambda cold start rate (%)",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4
-            },   
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/ApiTokenLambda' | filter @type = \"REPORT\" | stats pct(@initDuration, 90) as ColdStartP90Duration by bin(5m)",
-                "view": "bar",
-                "title": "Token lambda cold start duration (p90) in milliseconds",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4
-            },             
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"${AWS::StackName}/ApiJourneyOutcomeLambda\" MetricName=\"CriticalLogCountByContext\"', 'Sum')),0)", "id": "critical__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"${AWS::StackName}/ApiJourneyOutcomeLambda\" MetricName=\"ErrorLogCountByContext\"', 'Sum')),0)", "id": "error__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"${AWS::StackName}/ApiJourneyOutcomeLambda\" MetricName=\"WarnLogCountByContext\"', 'Sum')),0)", "id": "warn__total" } ]
-                ],
-                "view": "timeSeries",
-                "title": "Journey outcome lambda warnings/errors",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4              
-            }, 
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/ApiJourneyOutcomeLambda' | filter @type = \"REPORT\" | fields coalesce(@initDuration, 0) as InitDuration | stats pct(InitDuration + @duration, 90) as P90TotalDuration by bin(5m)",
-                "view": "bar",
-                "title": "Journey outcome lambda duration (p90) in milliseconds",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4
-            },             
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/ApiJourneyOutcomeLambda' | filter @type = \"REPORT\" | stats (count(@initDuration)/count(*))*100 as ColdStartRatePercent by bin(5m)",
-                "view": "bar",
-                "title": "Journey outcome lambda cold start rate (%)",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4
-            },   
-            {
-              "type": "log",
-              "properties": {
-                "query": "SOURCE '/aws/lambda/${AWS::StackName}/ApiJourneyOutcomeLambda' | filter @type = \"REPORT\" | stats pct(@initDuration, 90) as ColdStartP90Duration by bin(5m)",
-                "view": "bar",
-                "title": "Journey outcome lambda cold start duration (p90) in milliseconds",
-                "region": "${AWS::Region}"
-              },
-              "width": 6,
-              "height": 4
-            },                                                                                    
-            {
-              "type": "text",
-              "properties": {
-                "markdown": "&nbsp;\n# Passkeys",
-                "background": "transparent"
-              },
-              "width": 24,
-              "height": 3
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" scope=\"passkey-create\"', 'Sum'))", "id": "total" } ]
-                ],
-                "view": "singleValue",
-                "singleValueFullPrecision": true,
-                "title": "Passkeys created",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 4,
-              "height": 3
-            },  
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" scope=\"passkey-create\" client_id=auth', 'Sum'))", "id": "auth" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" scope=\"passkey-create\" client_id=home', 'Sum'))", "id": "home" } ]                  
-                ],
-                "view": "pie",
-                "title": "Passkeys created by client",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 4,
-              "height": 3
-            },             
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"PasskeyCreateError\"', 'Sum'))", "id": "total" } ]
-                ],
-                "view": "singleValue",
-                "singleValueFullPrecision": true,
-                "title": "Passkey creation errors",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 4,
-              "height": 3
-            },    
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"PasskeyCreateError\" client_id=auth', 'Sum'))", "id": "auth" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"PasskeyCreateError\" client_id=home', 'Sum'))", "id": "home" } ]                  
-                ],
-                "view": "pie",
-                "title": "Passkey creation errors by client",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 4,
-              "height": 3
-            },                     
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"AaguidNotFoundInPasskeysConvenienceMetadata\"', 'Sum'))", "id": "total" } ]                         
-                ],
-                "view": "singleValue",
-                "singleValueFullPrecision": true,
-                "title": "AAGUID not found in passkeys convenience metadata",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 4,
-              "height": 3
-            },    
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"AaguidNotFoundInPasskeysConvenienceMetadata\" client_id=auth', 'Sum'))", "id": "auth" } ],
-                  [ { "expression": "SUM(SEARCH('Namespace=\"amc\" MetricName=\"AaguidNotFoundInPasskeysConvenienceMetadata\" client_id=home', 'Sum'))", "id": "home" } ]                  
-                ],
-                "view": "pie",
-                "title": "AAGUID not found in passkeys convenience metadata by client",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 4,
-              "height": 3
-            },                        
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"JourneyCompletedSuccessfully\" scope=\"passkey-create\"', 'Sum')),0)", "id": "total" } ]
-                ],
-                "view": "timeSeries",
-                "title": "Passkeys created",
-                "region": "${AWS::Region}"
-              },
-              "width": 8,
-              "height": 5
-            },            
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"PasskeyCreateError\"', 'Sum')),0)", "id": "total" } ]
-                ],
-                "view": "timeSeries",
-                "title": "Passkey creation errors",
-                "region": "${AWS::Region}"
-              },
-              "width": 8,
-              "height": 5
-            },            
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"AaguidNotFoundInPasskeysConvenienceMetadata\"', 'Sum')),0)", "id": "total" } ]                         
-                ],
-                "view": "timeSeries",
-                "title": "AAGUID not found in passkeys convenience metadata",
-                "region": "${AWS::Region}"
-              },
-              "width": 8,
-              "height": 5
-            },
-            {
-              "type": "text",
-              "properties": {
-                "markdown": "&nbsp;\n# Notify",
-                "background": "transparent"
-              },
-              "width": 24,
-              "height": 3
-            },          
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"SendNotificationSucceeded\"', 'Sum')),0)", "id": "succeeded__total" } ],
-                  [ { "expression": "FILL(SUM(SEARCH('Namespace=\"amc\" MetricName=\"SendNotificationFailed\"', 'Sum')),0)", "id": "failed__total" } ],
-                  [ { "expression": "FILL(SEARCH('Namespace=\"amc\" MetricName=\"SendNotificationSucceeded\"', 'Sum'),0)", "id": "succeeded" } ],
-                  [ { "expression": "FILL(SEARCH('Namespace=\"amc\" MetricName=\"SendNotificationFailed\"', 'Sum'),0)", "id": "failed" } ]
-                ],
-                "view": "timeSeries",
-                "title": "Notifications",
-                "region": "${AWS::Region}"
-              },
-              "width": 14,
-              "height": 5          
-            },
-            {
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [ { "expression": "SEARCH('Namespace=\"amc\" MetricName=\"SendNotificationSucceeded\"', 'Sum')", "id": "total" } ]
-                ],
-                "view": "pie",
-                "title": "Successful notifications",
-                "region": "${AWS::Region}",
-                "setPeriodToTimeRange": true
-              },
-              "width": 10,              
-              "height": 5
-            }
-          ]
-        }
+        - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn # CHANGEME change as necessary for your application

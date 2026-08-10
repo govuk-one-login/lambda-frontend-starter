@@ -41,23 +41,10 @@ const solutionImportRestriction = {
             "",
           );
 
-          if (
-            importPathRelativeToThisFile === "/solutions/config/schema/types.js"
-          ) {
-            return;
-          }
-
           const filePathRelativeToThisFile = filePathAbsolute.replace(
             new RegExp(`^${RegExp.escape(import.meta.dirname)}`),
             "",
           );
-
-          if (
-            filePathRelativeToThisFile ===
-            "/solutions/commons/utils/fastify/types.d.ts"
-          ) {
-            return;
-          }
 
           const solutionRegex = /^\/solutions\/(.+?)\//;
 
@@ -69,7 +56,7 @@ const solutionImportRestriction = {
           if (importSolution !== "commons" && importSolution !== fileSolution) {
             context.report({
               node,
-              message: `Cannot import from solution "${importSolution}" in solution "${fileSolution}". Only imports from "commons" or the same solution are allowed.`,
+              message: `Cannot import from solution "${importSolution}" in solution "${fileSolution}". Only imports from the "commons" solution or the same solution are allowed.`,
             });
             return;
           }
@@ -88,7 +75,6 @@ export default defineConfig(
   {
     ignores: [
       "eslint.config.*", // Do not lint the ESLint config itself
-      "submodules/",
     ],
   },
   // Ensure JS files (including .mjs) use the default JS parser, not @typescript-eslint

@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { getEnvironment } from "../../../../commons/utils/getEnvironment/index.js";
+import { getEnvironment } from "../../utils/getEnvironment/index.js";
 
 export async function handler(_request: FastifyRequest, reply: FastifyReply) {
   return reply

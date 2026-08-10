@@ -26,45 +26,16 @@ if (env.PRE_OR_POST_DEPLOY === "pre") {
 }
 
 if (env.TEST_TARGET === "local") {
-  webServers.push(
-    {
-      command: "npm run run:all",
-      url: "http://localhost:6002/healthcheck",
-      reuseExistingServer: true,
-      timeout: 300000,
-      name: "all-servers",
-      gracefulShutdown: { signal: "SIGTERM", timeout: 30000 },
-      stderr: "pipe",
-      stdout: "pipe",
-    },
-    /*
-    These are needed to check the stubs and API servers are running.
-    These servers are started by `npm run run:all` run above but Playwright
-    only supports checking one healthcheck URL per server object
-    and we need to check the healthcheck URLs for the frontend, stubs
-    and API servers.
-    */
-    {
-      command: "sleep 310",
-      url: "http://localhost:6003/healthcheck",
-      reuseExistingServer: true,
-      timeout: 300000,
-      name: "stubs-server-healthcheck",
-      gracefulShutdown: { signal: "SIGTERM", timeout: 30000 },
-      stderr: "pipe",
-      stdout: "pipe",
-    },
-    {
-      command: "sleep 310",
-      url: "http://localhost:6004/healthcheck",
-      reuseExistingServer: true,
-      timeout: 300000,
-      name: "api-server-healthcheck",
-      gracefulShutdown: { signal: "SIGTERM", timeout: 30000 },
-      stderr: "pipe",
-      stdout: "pipe",
-    },
-  );
+  webServers.push({
+    command: "npm run start-frontend",
+    url: "http://localhost:6002/healthcheck",
+    reuseExistingServer: true,
+    timeout: 300000,
+    name: "frontend-server",
+    gracefulShutdown: { signal: "SIGTERM", timeout: 30000 },
+    stderr: "pipe",
+    stdout: "pipe",
+  });
 }
 
 // eslint-disable-next-line no-restricted-exports

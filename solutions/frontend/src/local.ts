@@ -1,4 +1,4 @@
-import { flushMetrics } from "../../commons/utils/fastify/flushMetrics/index.js";
+import { flushMetrics } from "./utils/fastify/flushMetrics/index.js";
 import { initFrontend } from "./index.js";
 
 const fastify = await initFrontend();

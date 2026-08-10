@@ -1,6 +1,6 @@
 Feature: Page not found
 
-  # Should fail because of known accessibility issues
+  # Should fail because of known accessibility issues with GOV.UK One Login frontend UI elements
   @failMobile
   Scenario: Visit a page which doesn't exist
     Given I go to the "Non-existent page" page
