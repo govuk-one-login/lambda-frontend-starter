@@ -3,7 +3,7 @@
 ## What features are included? (in no particular order and not exhaustive)
 
 - Fastify-based frontend application running using ESM and strict TypeScript type checking
-- Built with Rolldown to enable code splitting tree shaking and minification to minimise cold start times
+- Built with Rolldown to enable code splitting, tree shaking and minification to minimise cold start times
 - Serving and client-side caching of static assets with cache busting query strings generated at build-time
 - CSRF protection
 - HTTP security headers via Helmet
@@ -27,7 +27,8 @@
 - Unit testing with Vitest
 - Test coverage reporting
 - Playwright + playwright-bdd for integration tests which run locally, in GitHub Actions and in the deployment pipeline
-- Pre-written integration tests for basic functionality
+- Pre-written integration tests for included functionality
+- Pre-written integration testing steps to enable quickly getting started writing more tests
 - Pre-commit preconfigured
 - GitHub Actions for deployment (including manually deploying to dev), linting, unit testing, integration testing, SonarCloud scanning, reviewing dependencies
 - Dependabot pre-configured with cooldowns
@@ -35,6 +36,8 @@
 - `CODEOWNERS`, `CODE_OF_CONDUCT.md`, `SECURITY.md` included
 - Normalisation of API Gateway event headers and query string parameters
 - Utilities for Valibot schema validation errors mapped to GOV.UK error summary format
+- Error handler and page
+- Page not found handler and page
 - Example pages to help getting started
 - Healthcheck endpoint at `/healthcheck`
 - Trailing slash removal
@@ -74,7 +77,7 @@ This repo contains the code for CHANGEME
 - Install Docker
 - Install [Homebrew](https://brew.sh/)
 - Install Brewfile dependencies with `npm run install-brewfile`
-- Install dependencies with `npm ci`
+- Install dependencies with `npm ci --ignore-scripts`
 - Install Git Hooks with `npm run install-git-hooks`
 - Run `npm run start` to run the frontend. It will be available at `http://localhost:6002` and will watch for changes and rebuild on demand.
 
