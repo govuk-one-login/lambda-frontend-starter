@@ -1,9 +1,9 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
-import { parse } from "cookie";
+import { parseCookie } from "cookie";
 import { lngCookieName } from "../configureI18n/index.js";
 
 export const getPropsFromAPIGatewayEvent = (event: APIGatewayProxyEvent) => {
-  const cookies = parse(event.headers["cookie"] ?? "");
+  const cookies = parseCookie(event.headers["cookie"] ?? "");
 
   return {
     userLanguage: event.headers["user-language"] ?? cookies[lngCookieName],
