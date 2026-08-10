@@ -27,7 +27,8 @@
 - Unit testing with Vitest
 - Test coverage reporting
 - Playwright + playwright-bdd for integration tests which run locally, in GitHub Actions and in the deployment pipeline
-- Pre-written integration tests for basic functionality
+- Pre-written integration tests for included functionality
+- Pre-written integration testing steps to enable quickly getting started writing more tests
 - Pre-commit preconfigured
 - GitHub Actions for deployment (including manually deploying to dev), linting, unit testing, integration testing, SonarCloud scanning, reviewing dependencies
 - Dependabot pre-configured with cooldowns
@@ -35,6 +36,8 @@
 - `CODEOWNERS`, `CODE_OF_CONDUCT.md`, `SECURITY.md` included
 - Normalisation of API Gateway event headers and query string parameters
 - Utilities for Valibot schema validation errors mapped to GOV.UK error summary format
+- Error handler and page
+- Page not found handler and page
 - Example pages to help getting started
 - Healthcheck endpoint at `/healthcheck`
 - Trailing slash removal
