@@ -25,6 +25,7 @@ concurrency:
 
 jobs:
   publish-integration-tests-image:
+    if: ${{ false }} # CHANGEME remove this when you are ready to deploy to dev
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -62,6 +63,7 @@ jobs:
 
   deploy-to-dev:
     needs: publish-integration-tests-image
+    if: ${{ false }} # CHANGEME remove this when you are ready to deploy to dev
     runs-on: ubuntu-latest
     permissions:
       id-token: write
