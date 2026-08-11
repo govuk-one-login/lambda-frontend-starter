@@ -3,7 +3,7 @@ import { addDefaultCaching } from "./utils/fastify/addDefaultCaching/index.js";
 import Fastify from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import { render } from "./utils/fastify/render/index.js";
-import fastifyFormbody from "@fastify/formbody";
+import fastifyFormBody from "@fastify/formbody";
 import fastifyHelmet from "@fastify/helmet";
 import fastifySession from "@fastify/session";
 import en from "./translations/en.json" with { type: "json" };
@@ -35,9 +35,9 @@ import { FastifyPowertoolsLogger } from "./utils/fastify/powertoolsLogger/index.
 import { resolveEnvVarToBool } from "./utils/resolveEnvVarToBool/index.js";
 import { setAnalyticsForPath } from "./utils/setAnalyticsForPath/index.js";
 import { FastifyLogController } from "./utils/fastify/logController/index.js";
-import { paths } from "./utils/paths.js";
 import assert from "node:assert";
 import { getHelmetConfig } from "./utils/fastify/getHelmetConfig/index.js";
+import { routes } from "./routes.js";
 
 await configureI18n({
   [Lang.English]: {
@@ -156,41 +156,11 @@ export const initFrontend = async function () {
     },
   });
 
-  fastify.get("/healthcheck", async function (_request, reply) {
-    await reply.send("ok");
-    return reply;
-  });
-
-  fastify.get("/robots.txt", async function (request, reply) {
-    return (await import("./handlers/robots.txt/index.js")).handler(
-      request,
-      reply,
-    );
-  });
-
-  fastify.register(fastifyFormbody);
+  fastify.register(fastifyFormBody);
   fastify.register(fastifyHelmet, getHelmetConfig());
-
-  fastify.register(async (fastify) => {
-    fastify.register(fastifySession, await getSessionOptions());
-    fastify.register(csrfProtection);
-
-    // CHANGEME remove this example route and associated files in solutions/frontend/src/handlers/examplePage/
-    fastify.get(paths.examplePage.path, async function (request, reply) {
-      return (await import("./handlers/examplePage/index.js")).getHandler(
-        request,
-        reply,
-      );
-    });
-
-    // CHANGEME remove this example route and associated files in solutions/frontend/src/handlers/examplePage/
-    fastify.post(paths.examplePage.path, async function (request, reply) {
-      return (await import("./handlers/examplePage/index.js")).postHandler(
-        request,
-        reply,
-      );
-    });
-  });
+  fastify.register(fastifySession, await getSessionOptions());
+  fastify.register(csrfProtection);
+  fastify.register(routes);
 
   return fastify;
 };

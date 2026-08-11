@@ -41,7 +41,7 @@ describe("render", () => {
         } as unknown as typeof i18next,
       } as FastifyRequest,
       cspNonce: {
-        script: "scriptNonce",
+        script: "cspNonce",
         style: "styleNonce",
       },
     };

@@ -16,9 +16,12 @@ export class DynamoDbSessionStore implements SessionStore {
     session: Session,
     callback: (err: unknown) => void,
   ): void {
-    // CHANGEME update this if you want the default to be different
-    // it is also possible to set the session length in the application by
-    // simply doing something like request.session.expires = Math.floor(Date.now() / 1000) + 600;
+    // CHANGEME update the defaultSessionLength if you want it to be
+    // something other than five minutes. It is also possible to set the session
+    // length in the application by simply doing something like
+    // request.session.expires = Math.floor(Date.now() / 1000) + 600;
+    // for example in account management components we set the session length
+    // based on the expiry of an access token passed in the OAuth /authorize request
     const defaultSessionLength = Math.floor(Date.now() / 1000) + 300;
 
     dynamoDbClient

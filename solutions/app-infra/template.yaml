@@ -44,23 +44,27 @@ Parameters:
   AlertsStackName:
     Type: String
     Description: >
-      The name of a Dev Platform build notifications stack that contains SNS topics for alarms (https://github.com/govuk-one-login/devplatform-deploy/tree/main/build-notifications)
+      The name of a Dev Platform build notifications stack (https://github.com/govuk-one-login/devplatform-deploy/tree/main/build-notifications)
+      that contains SNS topics for alarms
     Default: "CHANGEME"
   CertificateStackName:
     Type: String
     Description: >
-      The name of a Dev Platform certificate stack in eu-west-2, configured for use with this application's domain (https://github.com/govuk-one-login/devplatform-deploy/tree/main/certificate)
+      The name of a Dev Platform certificate stack (https://github.com/govuk-one-login/devplatform-deploy/tree/main/certificate)
+      in this application's region, configured for use with this application's domain or a parent domain of it
     Default: "CHANGEME"
   CloudFrontStackName:
     Type: String
     Description: >
-      The name of a Dev Platform CloudFront stack configured for use with this application (https://github.com/govuk-one-login/devplatform-deploy/tree/main/cloudfront-distribution)
+      The name of a Dev Platform CloudFront stack (https://github.com/govuk-one-login/devplatform-deploy/tree/main/cloudfront-distribution)
+      configured for use with this application
     Default: "CHANGEME"
   HostedZoneStackName:
     Type: String
     Description: >
-      The name of a stack which configures the hosted zone for your application's domain. The stack should export a HostedZoneId output.
-      There is no Dev Platform stack so this needs to be a custom stack. See https://github.com/govuk-one-login/account-components/blob/main/solutions/infra/hosted_zone.tf
+      The name of a stack which configures the hosted zone for your application's domain or a parent domain of it.
+      The stack should export a HostedZoneId output. There is no Dev Platform stack so this needs to be a custom stack.
+      See https://github.com/govuk-one-login/account-components/blob/main/solutions/infra/hosted_zone.tf
       for how this is configured for Account Components.
     Default: "CHANGEME"
 
@@ -170,7 +174,7 @@ Globals:
       SecurityGroupIds:
         - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Timeout: 10
-    MemorySize: 1769 # so that we get ~1 VCPU
+    MemorySize: 1769 # so that we get ~1 VCPU (it may be possible to optimise this using AWS Lambda Power Tuning - https://github.com/alexcasalboni/aws-lambda-power-tuning)
     Architectures:
       - arm64
     Runtime: nodejs24.x
