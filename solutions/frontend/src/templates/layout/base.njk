@@ -90,16 +90,16 @@
 {% block bodyEnd %}
     {% block scripts %}{% endblock %}
 
-    <script type="module" src="/public/scripts/govuk-frontend.min.js?{{ globals.publicScriptsHash }}" nonce='{{ scriptNonce }}'></script>
+    <script type="module" src="/public/scripts/govuk-frontend.min.js?{{ globals.publicScriptsHash }}" nonce='{{ cspNonce }}'></script>
 
-    <script type="module"  nonce='{{ scriptNonce }}'>
+    <script type="module"  nonce='{{ cspNonce }}'>
       import { initAll } from '/public/scripts/govuk-frontend.min.js?{{ globals.publicScriptsHash }}';
       initAll();
     </script>
-    <script src="/public/scripts/analytics.js?{{ globals.publicScriptsHash }}" nonce='{{ scriptNonce }}'></script>
+    <script src="/public/scripts/analytics.js?{{ globals.publicScriptsHash }}" nonce='{{ cspNonce }}'></script>
 
     {% if globals.ga4ContainerId %}
-    <script nonce='{{ scriptNonce }}'>
+    <script nonce='{{ cspNonce }}'>
       if (window.DI) {
         window.DI.appInit({
           ga4ContainerId: "{{ globals.ga4ContainerId }}",
@@ -139,8 +139,8 @@
     </script>
     {% endif %}
 
-    <script type="module" src="/fingerprint/index.js?{{ globals.fingerprintHash }}" nonce='{{ scriptNonce }}'></script>
-    <script type="module" nonce='{{ scriptNonce }}'>
+    <script type="module" src="/fingerprint/index.js?{{ globals.fingerprintHash }}" nonce='{{ cspNonce }}'></script>
+    <script type="module" nonce='{{ cspNonce }}'>
       import { setFingerprintCookie } from "/fingerprint/index.js?{{ globals.fingerprintHash }}";
       setFingerprintCookie({% if globals.env === "local" %}"localhost"{% endif %});
     </script>

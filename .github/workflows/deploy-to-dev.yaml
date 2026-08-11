@@ -40,7 +40,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c
         with:
           # CHANGEME add a GitHub secret called DEV_PIPELINE_GH_ACTIONS_ROLE_ARN
-          # with the value of the GitHubActionsRoleArn output from your dev pipeline stack
+          # with the value of the GitHubActionsRoleArn output from your dev SAM deploy pipeline stack
           # see https://github.com/govuk-one-login/devplatform-deploy/tree/main/sam-deploy-pipeline
           role-to-assume: ${{ secrets.DEV_PIPELINE_GH_ACTIONS_ROLE_ARN }}
           aws-region: "eu-west-2"
@@ -108,7 +108,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c
         with:
           # CHANGEME add a GitHub secret called DEV_PIPELINE_GH_ACTIONS_ROLE_ARN
-          # with the value of the GitHubActionsRoleArn output from your dev pipeline stack
+          # with the value of the GitHubActionsRoleArn output from your dev SAM deploy pipeline stack
           # see https://github.com/govuk-one-login/devplatform-deploy/tree/main/sam-deploy-pipeline
           role-to-assume: ${{ secrets.DEV_PIPELINE_GH_ACTIONS_ROLE_ARN }}
           aws-region: "eu-west-2"
@@ -123,7 +123,7 @@ jobs:
         uses: govuk-one-login/devplatform-upload-action@64e46134b4108ebfa1cf2a64fee00782f8e2e8cf
         with:
           # CHANGEME add a GitHub secret called DEV_PIPELINE_SOURCE_BUCKET_NAME
-          # with the value of the GitHubArtifactSourceBucketName output from your dev pipeline stack
+          # with the value of the GitHubArtifactSourceBucketName output from your dev SAM deploy pipeline stack
           # see https://github.com/govuk-one-login/devplatform-deploy/tree/main/sam-deploy-pipeline
           artifact-bucket-name: ${{ secrets.DEV_PIPELINE_SOURCE_BUCKET_NAME }}
           # CHANGEME add a GitHub secret called DEV_SIGNING_PROFILE_NAME
