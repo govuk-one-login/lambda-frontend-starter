@@ -81,7 +81,7 @@ Once this infrastructure is configured then:
   - Require the following passing checks: `sonarcloud`, `dependency-review`, `local-tests-integration`, `local-tests-unit`, `lint`
   - Require merge queue
 - Find and action all instances of `CHANGEME` and `changeme`
-- Retain the contents of this README file below to following horizontal rule, and then read them for further context and setup instructions
+- Retain the contents of this README file below the following horizontal rule, and then read them for further context and setup instructions
 
 ---
 
