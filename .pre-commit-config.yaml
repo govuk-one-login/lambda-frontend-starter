@@ -87,7 +87,7 @@ repos:
         stages: [pre-commit]
 
   - repo: https://github.com/bridgecrewio/checkov.git
-    rev: bb451c5c4ae66a948eb8af386d0079e16a8ca0aa # pragma: allowlist secret
+    rev: 5458c889320a19ccf2e2eed54beb4c661c70f67a # pragma: allowlist secret
     hooks:
       - id: checkov
         entry: npm run checkov
