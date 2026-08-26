@@ -61,7 +61,7 @@
     "install-brewfile": "cat Brewfile; echo; echo; read -p \"Install/update Brewfile dependencies as shown above (y/N)?\" -n 1 -r; echo; if [ \"$REPLY\" == \"y\" ]; then brew bundle check || brew bundle install; fi",
     "install-git-hooks": "pre-commit install --install-hooks --overwrite",
     "audit": "npm audit --audit-level=moderate --omit=dev && npm audit signatures && cd solutions/integration-tests && npm run audit",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit && cd solutions/integration-tests && tsc --noEmit",
     "eslint": "eslint . --report-unused-disable-directives --cache --max-warnings 0",
     "eslint:fix": "eslint . --fix --report-unused-disable-directives --cache --max-warnings 0",
     "format": "prettier . --check",
