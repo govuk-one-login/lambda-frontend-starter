@@ -809,6 +809,41 @@ Resources:
       AlarmActions:
         - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
+  FrontendLambda4XXAndAboveResponseMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref FrontendLambdaLogGroup
+      FilterPattern: '{ $.message = "Response" && $.statusCode >= 400 }'
+      MetricTransformations:
+        - MetricNamespace: !Sub "${AWS::StackName}/FrontendLambda"
+          MetricName: 4XXAndAboveResponseCount
+          MetricValue: "1"
+          DefaultValue: 0
+
+  FrontendLambdaResponseStatusCodeAnomalyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProduction
+    Properties:
+      Metrics:
+        - Id: errorResponseCount
+          MetricStat:
+            Metric:
+              Namespace: !Sub "${AWS::StackName}/FrontendLambda"
+              MetricName: 4XXAndAboveResponseCount
+            Period: 300
+            Stat: Sum
+          ReturnData: true
+        - Id: band
+          Expression: ANOMALY_DETECTION_BAND(errorResponseCount, 2)
+          ReturnData: true
+      ComparisonOperator: GreaterThanUpperThreshold
+      ThresholdMetricId: band
+      EvaluationPeriods: 3
+      DatapointsToAlarm: 3
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
+
   FrontendLambdaDurationAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -851,7 +886,6 @@ Resources:
       EvaluationPeriods: 3
       DatapointsToAlarm: 3
       TreatMissingData: notBreaching
-      ActionsEnabled: false
       AlarmActions:
         - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
@@ -879,6 +913,5 @@ Resources:
       EvaluationPeriods: 3
       DatapointsToAlarm: 3
       TreatMissingData: notBreaching
-      ActionsEnabled: false
       AlarmActions:
         - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn # CHANGEME change as necessary for your application
