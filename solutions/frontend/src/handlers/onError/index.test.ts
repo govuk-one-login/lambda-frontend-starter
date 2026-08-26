@@ -6,6 +6,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 describe("onError handler", () => {
   let mockLog: {
     error: Mock;
+    warn: Mock;
   };
   let mockRequest: FastifyRequest;
   let mockReply: FastifyReply;
@@ -13,6 +14,7 @@ describe("onError handler", () => {
   beforeEach(() => {
     mockLog = {
       error: vi.fn(),
+      warn: vi.fn(),
     };
     mockRequest = {
       log: mockLog,
@@ -55,5 +57,35 @@ describe("onError handler", () => {
     expect(mockReply.render).toHaveBeenCalledExactlyOnceWith(
       "handlers/onError/index.njk",
     );
+  });
+
+  describe("when a CSRF error occurs", () => {
+    const csrfError = Object.assign(new Error("CSRF error"), {
+      code: "FST_CSRF_INVALID_TOKEN",
+    });
+
+    it("logs the error as a warning", async () => {
+      await onError(csrfError, mockRequest, mockReply);
+
+      expect(mockLog.warn).toHaveBeenCalledExactlyOnceWith(
+        csrfError,
+        "ERROR_CAUGHT_BY_GLOBAL_ERROR_HANDLER",
+      );
+      expect(mockLog.error).not.toHaveBeenCalled();
+    });
+
+    it("sets status code to 403", async () => {
+      await onError(csrfError, mockRequest, mockReply);
+
+      expect(mockReply.statusCode).toBe(403);
+    });
+
+    it("renders the error template", async () => {
+      await onError(csrfError, mockRequest, mockReply);
+
+      expect(mockReply.render).toHaveBeenCalledExactlyOnceWith(
+        "handlers/onError/index.njk",
+      );
+    });
   });
 });
