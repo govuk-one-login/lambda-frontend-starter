@@ -560,7 +560,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "/aws/apigateway/${FrontendApiGateway}/${Environment}"
-      RetentionInDays: 30
+      RetentionInDays: 90
       KmsKeyId: !GetAtt CloudWatchEncryptionKey.Arn
 
   FrontendLambda:
@@ -647,7 +647,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "/aws/lambda/${AWS::StackName}/FrontendLambda"
-      RetentionInDays: 30
+      RetentionInDays: 90
       KmsKeyId: !GetAtt CloudWatchEncryptionKey.Arn
 
   FrontendApiGateway5XXErrorsAlarm:
