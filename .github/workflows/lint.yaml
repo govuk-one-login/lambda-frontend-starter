@@ -33,7 +33,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
-        uses: actions/setup-python@751276eafca55f10f252026015f43c488f2322ba
+        uses: actions/setup-python@ad3497abcd142e169a10aac37abd5175c44f33c4
         with:
           python-version: "3.14"
 
