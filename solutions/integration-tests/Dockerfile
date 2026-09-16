@@ -1,7 +1,7 @@
 # Despite what SonarQube says both the tag and sha digest are needed:
 # the digest pins the exact image for reproducibility,
 # the tag allows Dependabot to evaluate version constraints
-FROM node:24.20.0-bookworm@sha256:be23f54a88d34e8824c741b19b91064094f92c1c97b194144bfc8b50d67258e2
+FROM node:24.21.0-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0
 
 # Ignore what SonarQube says about using ADD instead of curl
 # curl is used intentionally over ADD: ADD lacks support for --proto, -f, -s, -L flags and cannot
