@@ -39,7 +39,7 @@
     "@types/aws-lambda": "^8.10.163",
     "@types/node": "^24.13.3",
     "@types/nunjucks": "^3.2.6",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "@vitest/eslint-plugin": "^1.6.27",
     "chokidar-cli": "^3.0.0",
     "concurrently": "^10.0.5",
