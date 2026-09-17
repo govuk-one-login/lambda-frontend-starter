@@ -72,7 +72,7 @@ Mappings:
   EnvironmentConfiguration:
     dev:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables # pragma: allowlist secret
-      powertoolsLogLevel: DEBUG
+      lambdaLogLevel: DEBUG
       useCanary: false
       frontendDomain: CHANGEME # e.g manage.dev.account.gov.uk
       authFrontendUrl: https://signin.dev.account.gov.uk
@@ -82,7 +82,7 @@ Mappings:
       rootDomainWithEnv: dev.account.gov.uk
     build:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables # pragma: allowlist secret
-      powertoolsLogLevel: INFO
+      lambdaLogLevel: INFO
       useCanary: false
       frontendDomain: CHANGEME # e.g manage.build.account.gov.uk
       authFrontendUrl: https://signin.build.account.gov.uk
@@ -92,7 +92,7 @@ Mappings:
       rootDomainWithEnv: build.account.gov.uk
     staging:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables # pragma: allowlist secret
-      powertoolsLogLevel: INFO
+      lambdaLogLevel: INFO
       useCanary: true
       frontendDomain: CHANGEME # e.g manage.staging.account.gov.uk
       authFrontendUrl: https://signin.staging.account.gov.uk
@@ -102,7 +102,7 @@ Mappings:
       rootDomainWithEnv: staging.account.gov.uk
     integration:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables # pragma: allowlist secret
-      powertoolsLogLevel: INFO
+      lambdaLogLevel: INFO
       useCanary: true
       frontendDomain: CHANGEME # e.g manage.integration.account.gov.uk
       authFrontendUrl: https://signin.integration.account.gov.uk
@@ -112,7 +112,7 @@ Mappings:
       rootDomainWithEnv: integration.account.gov.uk
     production:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceProductionVariables # pragma: allowlist secret
-      powertoolsLogLevel: INFO
+      lambdaLogLevel: INFO
       useCanary: true
       frontendDomain: CHANGEME # e.g manage.account.gov.uk
       authFrontendUrl: https://signin.account.gov.uk
@@ -173,6 +173,10 @@ Globals:
         - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdC
       SecurityGroupIds:
         - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+    LoggingConfig:
+      LogFormat: JSON
+      ApplicationLogLevel:
+        !FindInMap [EnvironmentConfiguration, !Ref Environment, lambdaLogLevel]
     Timeout: 10
     MemorySize: 1769 # so that we get ~1 VCPU (it may be possible to optimise this using AWS Lambda Power Tuning - https://github.com/alexcasalboni/aws-lambda-power-tuning)
     Architectures:
@@ -184,7 +188,7 @@ Globals:
           !FindInMap [
             EnvironmentConfiguration,
             !Ref Environment,
-            powertoolsLogLevel,
+            lambdaLogLevel,
           ]
         POWERTOOLS_SERVICE_NAME: !Ref AWS::StackName
         POWERTOOLS_PARAMETERS_MAX_AGE: 300
@@ -394,8 +398,8 @@ Resources:
       MetricName: ClaimedAccountConcurrency
       Statistic: Maximum
       Period: 60
-      EvaluationPeriods: 10
-      DatapointsToAlarm: 10
+      EvaluationPeriods: 5
+      DatapointsToAlarm: 5
       Threshold: 900
       ComparisonOperator: GreaterThanThreshold
       TreatMissingData: notBreaching
@@ -514,6 +518,7 @@ Resources:
           - id: "CKV_AWS_120"
             comment: "We don't want API Gateway to cache responses"
     Properties:
+      Name: !Sub "${AWS::StackName}-frontend"
       StageName: !Ref Environment
       AlwaysDeploy: true
       DisableExecuteApiEndpoint: true
@@ -578,7 +583,6 @@ Resources:
       DeploymentPreference:
         Alarms:
           - !Ref FrontendLambdaErrorsAlarm
-          - !Ref FrontendLambdaThrottlesAlarm
           - !Ref FrontendLambdaAvailabilityAlarm
           - !Ref FrontendLambdaLogErrorAlarm
       LoggingConfig:
@@ -657,7 +661,7 @@ Resources:
       MetricName: 5XXError
       Dimensions:
         - Name: ApiName
-          Value: !Ref FrontendApiGateway
+          Value: !Sub "${AWS::StackName}-frontend"
       Statistic: Sum
       Period: 300
       EvaluationPeriods: 1
@@ -677,11 +681,11 @@ Resources:
       MetricName: Latency
       Dimensions:
         - Name: ApiName
-          Value: !Ref FrontendApiGateway
+          Value: !Sub "${AWS::StackName}-frontend"
       Statistic: Average
       Period: 300
-      EvaluationPeriods: 2
-      Threshold: 5000
+      EvaluationPeriods: 3
+      Threshold: 3000
       ComparisonOperator: GreaterThanThreshold
       TreatMissingData: notBreaching
       AlarmActions:
@@ -690,7 +694,7 @@ Resources:
   FrontendLambdaErrorsAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      Namespace: !Sub "${AWS::StackName}/FrontendLambda"
+      Namespace: AWS/Lambda
       MetricName: Errors
       Dimensions:
         - Name: FunctionName
@@ -711,7 +715,7 @@ Resources:
   FrontendLambdaThrottlesAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      Namespace: !Sub "${AWS::StackName}/FrontendLambda"
+      Namespace: AWS/Lambda
       MetricName: Throttles
       Dimensions:
         - Name: FunctionName
@@ -798,7 +802,7 @@ Resources:
             Stat: Sum
           ReturnData: false
         - Id: availability
-          Expression: "1 - (errors / total)"
+          Expression: "IF(total > 0, 1 - (errors / total))"
           Label: "Availability"
           ReturnData: true
       Threshold: 0.999
@@ -807,47 +811,15 @@ Resources:
       DatapointsToAlarm: 3
       TreatMissingData: notBreaching
       AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
-
-  FrontendLambda4XXAndAboveResponseMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      LogGroupName: !Ref FrontendLambdaLogGroup
-      FilterPattern: '{ $.message = "Response" && $.statusCode >= 400 }'
-      MetricTransformations:
-        - MetricNamespace: !Sub "${AWS::StackName}/FrontendLambda"
-          MetricName: 4XXAndAboveResponseCount
-          MetricValue: "1"
-          DefaultValue: 0
-
-  FrontendLambdaResponseStatusCodeAnomalyAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Condition: IsProduction
-    Properties:
-      Metrics:
-        - Id: errorResponseCount
-          MetricStat:
-            Metric:
-              Namespace: !Sub "${AWS::StackName}/FrontendLambda"
-              MetricName: 4XXAndAboveResponseCount
-            Period: 300
-            Stat: Sum
-          ReturnData: true
-        - Id: band
-          Expression: ANOMALY_DETECTION_BAND(errorResponseCount, 2)
-          ReturnData: true
-      ComparisonOperator: GreaterThanUpperThreshold
-      ThresholdMetricId: band
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
+        - !If
+          - IsProduction
+          - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn # CHANGEME change as necessary for your application
+          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
   FrontendLambdaDurationAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      Namespace: !Sub "${AWS::StackName}/FrontendLambda"
+      Namespace: AWS/Lambda
       MetricName: Duration
       Dimensions:
         - Name: FunctionName
@@ -862,16 +834,26 @@ Resources:
       AlarmActions:
         - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
 
+  FrontendLambdaColdStartInitDurationMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref FrontendLambdaLogGroup
+      FilterPattern: '{ $.type = "platform.report" && $.record.metrics.initDurationMs > 0 }'
+      MetricTransformations:
+        - MetricNamespace: !Sub "${AWS::StackName}/FrontendLambda"
+          MetricName: ColdStartInitDurationMs
+          MetricValue: $.record.metrics.initDurationMs
+          Unit: Milliseconds
+
   FrontendLambdaColdStartDurationAnomalyAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsProduction
     Properties:
       Metrics:
         - Id: initDuration
           MetricStat:
             Metric:
-              Namespace: AWS/Lambda
-              MetricName: InitDuration
+              Namespace: !Sub "${AWS::StackName}/FrontendLambda"
+              MetricName: ColdStartInitDurationMs
               Dimensions:
                 - Name: FunctionName
                   Value: !Ref FrontendLambda
@@ -883,15 +865,17 @@ Resources:
           ReturnData: true
       ComparisonOperator: GreaterThanUpperThreshold
       ThresholdMetricId: band
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
+      EvaluationPeriods: 5
+      DatapointsToAlarm: 5
       TreatMissingData: notBreaching
       AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
+        - !If
+          - IsProduction
+          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
+          - !Ref AWS::NoValue
 
-  FrontendApiGatewayTrafficAnomalyAlarm:
+  FrontendApiGatewayHighTrafficAnomalyAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsProduction
     Properties:
       Metrics:
         - Id: traffic
@@ -901,7 +885,36 @@ Resources:
               MetricName: Count
               Dimensions:
                 - Name: ApiName
-                  Value: !Ref FrontendApiGateway
+                  Value: !Sub "${AWS::StackName}-frontend"
+            Period: 300
+            Stat: Sum
+          ReturnData: true
+        - Id: band
+          Expression: ANOMALY_DETECTION_BAND(traffic, 2)
+          ReturnData: true
+      ComparisonOperator: GreaterThanUpperThreshold
+      ThresholdMetricId: band
+      EvaluationPeriods: 5
+      DatapointsToAlarm: 5
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !If
+          - IsProduction
+          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
+          - !Ref AWS::NoValue
+
+  FrontendApiGatewayLowTrafficAnomalyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      Metrics:
+        - Id: traffic
+          MetricStat:
+            Metric:
+              Namespace: AWS/ApiGateway
+              MetricName: Count
+              Dimensions:
+                - Name: ApiName
+                  Value: !Sub "${AWS::StackName}-frontend"
             Period: 300
             Stat: Sum
           ReturnData: true
@@ -910,8 +923,11 @@ Resources:
           ReturnData: true
       ComparisonOperator: LessThanLowerThreshold
       ThresholdMetricId: band
-      EvaluationPeriods: 3
-      DatapointsToAlarm: 3
+      EvaluationPeriods: 5
+      DatapointsToAlarm: 5
       TreatMissingData: notBreaching
       AlarmActions:
-        - Fn::ImportValue: !Sub ${AlertsStackName}-SecondLineAlertsTopicArn # CHANGEME change as necessary for your application
+        - !If
+          - IsProduction
+          - Fn::ImportValue: !Sub ${AlertsStackName}-WarningAlertsTopicArn # CHANGEME change as necessary for your application
+          - !Ref AWS::NoValue
