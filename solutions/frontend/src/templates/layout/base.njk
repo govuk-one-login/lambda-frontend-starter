@@ -64,7 +64,7 @@
     {{ frontendUiLanguageSelect({
         url: globals.currentUrl,
         activeLanguage: globals.lng,
-        translations: 'FECTranslations.languageSelect' | translate
+        translations: 'FECTranslations.languageSelect' | translate({ returnObjects: true })
       }) 
     }}
     
