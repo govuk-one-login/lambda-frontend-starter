@@ -1,91 +1,123 @@
-import type { Mock } from "vitest";
-import { expect, it, describe, vi, afterEach, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import { onError } from "./index.js";
-import type { FastifyRequest, FastifyReply } from "fastify";
 
-describe("onError handler", () => {
-  let mockLog: {
-    error: Mock;
-    warn: Mock;
-  };
-  let mockRequest: FastifyRequest;
-  let mockReply: FastifyReply;
+// @ts-expect-error
+vi.mock(import("../../utils/isFastifyError/index.js"), () => ({
+  isFastifyError: vi.fn(),
+}));
 
-  beforeEach(() => {
-    mockLog = {
+import { isFastifyError } from "../../utils/isFastifyError/index.js";
+
+const mockIsFastifyError = vi.mocked(isFastifyError);
+
+const makeRequest = () =>
+  ({
+    log: {
       error: vi.fn(),
       warn: vi.fn(),
-    };
-    mockRequest = {
-      log: mockLog,
-    } as unknown as FastifyRequest;
+    },
+  }) as unknown as FastifyRequest;
 
-    mockReply = {
-      statusCode: 200,
-      render: vi.fn(),
-    } as unknown as FastifyReply;
-  });
+const makeReply = () =>
+  ({
+    statusCode: 200,
+    render: vi.fn().mockResolvedValue(undefined),
+  }) as unknown as FastifyReply;
 
+describe("onError handler", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("logs the error with correct message", async () => {
-    const testError = new Error("Test error");
-
-    await onError(testError, mockRequest, mockReply);
-
-    expect(mockLog.error).toHaveBeenCalledExactlyOnceWith(
-      testError,
-      "ERROR_CAUGHT_BY_GLOBAL_ERROR_HANDLER",
-    );
-  });
-
-  it("sets status code to 500", async () => {
-    const testError = new Error("Test error");
-
-    await onError(testError, mockRequest, mockReply);
-
-    expect(mockReply.statusCode).toBe(500);
-  });
-
-  it("renders the default error template", async () => {
-    const testError = new Error("Test error");
-
-    await onError(testError, mockRequest, mockReply);
-
-    expect(mockReply.render).toHaveBeenCalledExactlyOnceWith(
-      "handlers/onError/index.njk",
-    );
-  });
-
-  describe("when a CSRF error occurs", () => {
-    const csrfError = Object.assign(new Error("CSRF error"), {
-      code: "FST_CSRF_INVALID_TOKEN",
+  describe("non-Fastify errors", () => {
+    beforeEach(() => {
+      mockIsFastifyError.mockReturnValue(false);
     });
 
-    it("logs the error as a warning", async () => {
-      await onError(csrfError, mockRequest, mockReply);
+    it("sets status code to 500", async () => {
+      const request = makeRequest();
+      const reply = makeReply();
+      await onError(new Error("boom"), request, reply);
 
-      expect(mockLog.warn).toHaveBeenCalledExactlyOnceWith(
-        csrfError,
+      expect(reply.statusCode).toBe(500);
+    });
+
+    it("logs with error level", async () => {
+      const request = makeRequest();
+      const reply = makeReply();
+      const error = new Error("boom");
+      await onError(error, request, reply);
+
+      expect(request.log.error).toHaveBeenCalledExactlyOnceWith(
+        error,
         "ERROR_CAUGHT_BY_GLOBAL_ERROR_HANDLER",
       );
-      expect(mockLog.error).not.toHaveBeenCalled();
-    });
-
-    it("sets status code to 403", async () => {
-      await onError(csrfError, mockRequest, mockReply);
-
-      expect(mockReply.statusCode).toBe(403);
+      expect(request.log.warn).not.toHaveBeenCalled();
     });
 
     it("renders the error template", async () => {
-      await onError(csrfError, mockRequest, mockReply);
+      const request = makeRequest();
+      const reply = makeReply();
+      await onError(new Error("boom"), request, reply);
 
-      expect(mockReply.render).toHaveBeenCalledExactlyOnceWith(
+      expect(reply.render).toHaveBeenCalledExactlyOnceWith(
         "handlers/onError/index.njk",
       );
+    });
+  });
+
+  describe("cSRF Fastify errors", () => {
+    beforeEach(() => {
+      mockIsFastifyError.mockReturnValue(true);
+    });
+
+    it("sets status code to 403", async () => {
+      const request = makeRequest();
+      const reply = makeReply();
+      await onError({ code: "FST_CSRF_INVALID_TOKEN" }, request, reply);
+
+      expect(reply.statusCode).toBe(403);
+    });
+
+    it("logs with warn level", async () => {
+      const request = makeRequest();
+      const reply = makeReply();
+      const error = { code: "FST_CSRF_INVALID_TOKEN" } as never;
+      await onError(error, request, reply);
+
+      expect(request.log.warn).toHaveBeenCalledExactlyOnceWith(
+        error,
+        "ERROR_CAUGHT_BY_GLOBAL_ERROR_HANDLER",
+      );
+      expect(request.log.error).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("fST_ERR_CTP_EMPTY_JSON_BODY Fastify error", () => {
+    beforeEach(() => {
+      mockIsFastifyError.mockReturnValue(true);
+    });
+
+    it("sets status code to 400", async () => {
+      const request = makeRequest();
+      const reply = makeReply();
+      await onError({ code: "FST_ERR_CTP_EMPTY_JSON_BODY" }, request, reply);
+
+      expect(reply.statusCode).toBe(400);
+    });
+
+    it("logs with warn level", async () => {
+      const request = makeRequest();
+      const reply = makeReply();
+      const error = { code: "FST_ERR_CTP_EMPTY_JSON_BODY" } as never;
+      await onError(error, request, reply);
+
+      expect(request.log.warn).toHaveBeenCalledExactlyOnceWith(
+        error,
+        "ERROR_CAUGHT_BY_GLOBAL_ERROR_HANDLER",
+      );
+      expect(request.log.error).not.toHaveBeenCalled();
     });
   });
 });
