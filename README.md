@@ -102,7 +102,7 @@ This repo contains the code for CHANGEME
 
 When updating the Node version you will need to update the following:
 
-- `engines.node` field in all `package.json` files
+- `engines.node` field in all `package.json` and `package-lock.json` files
 - all `.nvmrc` files (the version should correspond to the lowest version which matches the `engines.node` field in the associated `package.json` file)
 - Node version used by Lambda functions
 - Node version used in Docker images
