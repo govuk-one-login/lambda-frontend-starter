@@ -52,7 +52,7 @@ await configureI18n({
   },
 });
 
-export const initFrontend = async function () {
+export const initFrontend = function () {
   const fastify = Fastify.default({
     trustProxy: true, // Required as HTTPS is terminated before the Lambda
     loggerInstance: new FastifyPowertoolsLogger(),
@@ -158,7 +158,7 @@ export const initFrontend = async function () {
 
   fastify.register(fastifyFormBody);
   fastify.register(fastifyHelmet, getHelmetConfig());
-  fastify.register(fastifySession, await getSessionOptions());
+  fastify.register(fastifySession, getSessionOptions());
   fastify.register(csrfProtection);
   fastify.register(routes);
 
