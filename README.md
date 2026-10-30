@@ -32,7 +32,6 @@
 - Pre-commit preconfigured
 - GitHub Actions for deployment (including manually deploying to dev), linting, unit testing, integration testing, SonarCloud scanning, reviewing dependencies
 - Dependabot pre-configured with cooldowns
-- Quality gate manifest which reflects the checks in place
 - `CODEOWNERS`, `CODE_OF_CONDUCT.md`, `SECURITY.md` included
 - Normalisation of API Gateway event headers and query string parameters
 - Utilities for Valibot schema validation errors mapped to GOV.UK error summary format
