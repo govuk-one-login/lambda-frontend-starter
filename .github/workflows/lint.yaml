@@ -19,7 +19,7 @@ jobs:
           persist-credentials: false
 
       - name: Check GitHub Actions
-        uses: zizmorcore/zizmor-action@27d989be9329e6cff7f80baf450ca83bf4c94898
+        uses: zizmorcore/zizmor-action@4a9eca449a683b2d742b9a431babf6a259edcdad
 
       - name: Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
@@ -27,7 +27,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Set up Python
-        uses: actions/setup-python@ff73b2463e2f3baa703f830da214b8dfeeaeccf8
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
         with:
           python-version: "3.14"
 
