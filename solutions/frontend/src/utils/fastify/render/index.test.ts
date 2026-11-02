@@ -12,15 +12,17 @@ vi.mock(import("../getCurrentUrl/index.js"), () => ({
   getCurrentUrl: vi.fn().mockReturnValue(new URL("http://example.com/current")),
 }));
 
-const mockEnv = {
-  addFilter: vi.fn(),
-  addGlobal: vi.fn(),
-};
-
-const nunjucks = {
-  configure: vi.fn().mockReturnValue(mockEnv),
-  render: vi.fn(),
-};
+const { nunjucks, mockEnv } = vi.hoisted(() => {
+  const mockEnv = {
+    addFilter: vi.fn(),
+    addGlobal: vi.fn(),
+  };
+  const nunjucks = {
+    configure: vi.fn().mockReturnValue(mockEnv),
+    render: vi.fn(),
+  };
+  return { nunjucks, mockEnv };
+});
 
 // @ts-expect-error
 vi.mock(import("nunjucks"), () => ({
