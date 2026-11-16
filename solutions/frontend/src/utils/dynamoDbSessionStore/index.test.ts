@@ -252,7 +252,7 @@ describe("dynamoDbSessionStore", () => {
           UpdateExpression:
             "SET #session = :session, #expires = :expires, #generation = :newGeneration",
           ConditionExpression:
-            "attribute_exists(#id) AND #generation = :expectedGeneration",
+            "attribute_exists(#id) AND (#generation = :expectedGeneration OR attribute_not_exists(#generation))",
           ExpressionAttributeNames: {
             "#id": "id",
             "#session": "session",
@@ -293,6 +293,27 @@ describe("dynamoDbSessionStore", () => {
             }),
           }),
         );
+        expect(callback).toHaveBeenCalledWith(null);
+      });
+    });
+
+    it("succeeds for existing sessions without a generation attribute", async () => {
+      const sessionStoreId = "test-session-store-id";
+      const expectedGeneration = "old-session-id";
+      const session = {} as Session;
+      const callback = vi.fn();
+
+      // DynamoDB allows the update when attribute_not_exists(#generation) matches
+      mockDynamoDbClient.update.mockResolvedValue({});
+
+      store.compareAndSet(
+        sessionStoreId,
+        expectedGeneration,
+        session,
+        callback,
+      );
+
+      await vi.waitFor(() => {
         expect(callback).toHaveBeenCalledWith(null);
       });
     });
