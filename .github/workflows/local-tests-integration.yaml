@@ -39,8 +39,7 @@ jobs:
           SESSIONS_TABLE_NAME=changeme-SessionStore # replace changeme with the value of AWS::StackName in solutions/app-infra/template.yaml
           ROOT_DOMAIN_WITH_ENV=localhost
           AWS_REGION=eu-west-2
-          LOCAL_AWS_ENDPOINT=http://localhost:4566
-          LOCAL_AWS_KMS_ENDPOINT=http://localhost:4567
+          LOCAL_AWS_ENDPOINT=https://localhost:9297
           LOCAL_AWS_ACCESS_KEY_ID=test
           LOCAL_AWS_ACCESS_KEY=test
           AUTH_FRONTEND_URL=https://signin.account.gov.uk

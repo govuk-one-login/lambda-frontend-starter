@@ -18,7 +18,7 @@
 - Utilities for structured logging and metrics
 - Request/response structured logging
 - Fast local development server with file watching and rebuilding
-- Local AWS stack via Docker: Floci and Local KMS
+- Local AWS emulation using the official AWS Emulator
 - AWS client preconfigured to work with AWS and the local emulations
 - CloudFormation template containing most of the infrastructure needed to deploy this application via the Dev Platform SAM pipeline
 - Dynatrace Lambda layer
