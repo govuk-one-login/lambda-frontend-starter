@@ -20,9 +20,11 @@ Feature: Language switcher
     And there is a "lng" query string parameter set to "cy"
     And the page looks as expected
     And the page meets our accessibility standards
+    Given I go to the "Non-existent page" page
+    Then the language toggle shows
+    And the "lng" cookie is set to "cy"
+    And the page looks as expected
 
-  # Should fail because of known accessibility issues with GOV.UK One Login frontend UI elements
-  @failMobile
   Scenario: Switches to English from Welsh
     Given I go to the "Non-existent page" page
     Then the language toggle shows
@@ -30,8 +32,12 @@ Feature: Language switcher
     Given I click the "Cymraeg" language link
     Then the "lng" cookie is set to "cy"
     And there is a "lng" query string parameter set to "cy"
+    And the page looks as expected    
     Given I click the "English" language link
     Then the "lng" cookie is set to "en"
     And there is a "lng" query string parameter set to "en"
     And the page looks as expected
-    And the page meets our accessibility standards
+    Given I go to the "Non-existent page" page
+    Then the language toggle shows
+    And the "lng" cookie is set to "en"
+    And the page looks as expected
