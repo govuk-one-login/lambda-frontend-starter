@@ -24,10 +24,6 @@ Given("I go to the {string} page", async ({ page }, pageName: string) => {
   await page.goto(pageNameToPath[pageName]);
 });
 
-Given("I refresh the page", async ({ page }) => {
-  await page.reload();
-});
-
 Then("the page looks as expected", async ({ page }) => {
   // eslint-disable-next-line playwright/no-networkidle
   await page.waitForLoadState("networkidle");
