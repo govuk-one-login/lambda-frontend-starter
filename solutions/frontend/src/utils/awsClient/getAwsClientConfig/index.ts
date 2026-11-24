@@ -7,7 +7,7 @@ import { resolveEnvVarToBool } from "../../resolveEnvVarToBool/index.js";
 export const getAwsClientConfig = () => {
   assert.ok(process.env["AWS_REGION"], "AWS_REGION is not set");
 
-  const useLocalAws = !resolveEnvVarToBool("USE_LOCAL_AWS");
+  const useLocalAws = resolveEnvVarToBool("USE_LOCAL_AWS");
 
   return {
     region: process.env["AWS_REGION"],
