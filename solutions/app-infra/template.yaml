@@ -418,11 +418,11 @@ Resources:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
-    #Metadata:
-    # checkov:
-    #   skip:
-    #     - id: "CKV_AWS_28"
-    #       comment: "Sessions table does not require point in time recovery as session data is ephemeral"
+    Metadata:
+      checkov:
+        skip:
+          - id: "CKV_AWS_28"
+            comment: "Sessions table does not require point in time recovery as session data is ephemeral"
     Properties:
       TableName: !Sub ${AWS::StackName}-SessionStore
       AttributeDefinitions:
@@ -511,11 +511,11 @@ Resources:
 
   FrontendApiGateway:
     Type: AWS::Serverless::Api
-    #Metadata:
-    # checkov:
-    #   skip:
-    #     - id: "CKV_AWS_120"
-    #       comment: "We don't want API Gateway to cache responses"
+    Metadata:
+      checkov:
+        skip:
+          - id: "CKV_AWS_120"
+            comment: "We don't want API Gateway to cache responses"
     Properties:
       Name: !Sub "${AWS::StackName}-frontend"
       StageName: !Ref Environment
@@ -570,10 +570,10 @@ Resources:
   FrontendLambda:
     Type: AWS::Serverless::Function
     Metadata:
-      # checkov:
-      #   skip:
-      #     - id: "CKV_AWS_116"
-      #       comment: "This lambda does not need a dead letter queue"
+      checkov:
+        skip:
+          - id: "CKV_AWS_116"
+            comment: "This lambda does not need a dead letter queue"
       BuildMethod: makefile
     Properties:
       CodeUri: solutions/frontend/dist
