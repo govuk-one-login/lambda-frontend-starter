@@ -1,0 +1,4 @@
+directory:
+  - .
+skip-framework:
+  - github_actions # zizmor handles checking GitHub Actions

@@ -75,7 +75,7 @@
     "detect-secrets-recreate": "detect-secrets scan --slim > .secrets.baseline",
     "zizmor": "zizmor .github/",
     "zizmor:fix": "zizmor .github/ --fix",
-    "checkov": "checkov --directory ./",
+    "checkov": "checkov",
     "sam-validate": "sam validate --region eu-west-2 --lint -t solutions/app-infra/template.yaml",
     "build": "cd solutions/frontend && bash ./build/production.sh",
     "build-local": "cd solutions/frontend && bash ./build/local.sh",
